@@ -31,6 +31,9 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
   public UnrealCodegenGenerator() {
     super();
 
+
+    
+
     // set the output folder here
     outputFolder = "generated-code/unreal-codegen";
     /**
@@ -46,6 +49,9 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
      * will use the resource stream to attempt to read the templates.
      */
     templateDir = "unreal-codegen";
+
+    modelNamePrefix = "UCognite";
+
 
     modelTemplateFiles.put("model-header.mustache", ".h");
     modelTemplateFiles.put("model-body.mustache", ".cpp");
@@ -105,33 +111,35 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
                     "int64",
                     "double",
                     "float",
-                    "FString")
+                    "FString",
+                    "TArray",
+                    "TMap")
     );
 
     super.typeMapping = new HashMap<String, String>();
 
-        //typeMapping.put("Date", "DateTime");
-        //typeMapping.put("DateTime", "DateTime");
-        typeMapping.put("string", "FString");
-        typeMapping.put("integer", "int32");
-        typeMapping.put("float", "float");
-        typeMapping.put("long", "int64");
-        typeMapping.put("boolean", "bool");
-        typeMapping.put("double", "double");
-        typeMapping.put("array", "TArray");
-        typeMapping.put("map", "TMap");
-        typeMapping.put("number", "int64");
-        typeMapping.put("object", "FString");
-        typeMapping.put("binary", "FString");
-        typeMapping.put("password", "FString");
-        //TODO:Maybe use better formats for dateTime?
-        typeMapping.put("file", "FString");
-        typeMapping.put("DateTime", "FString");
-        typeMapping.put("Date", "FString");
-        typeMapping.put("UUID", "FString");
-        typeMapping.put("URI", "FString");
+    //typeMapping.put("Date", "DateTime");
+    //typeMapping.put("DateTime", "DateTime");
+    typeMapping.put("string", "FString");
+    typeMapping.put("integer", "int32");
+    typeMapping.put("float", "float");
+    typeMapping.put("long", "int64");
+    typeMapping.put("boolean", "bool");
+    typeMapping.put("double", "double");
+    typeMapping.put("array", "TArray");
+    typeMapping.put("map", "TMap");
+    typeMapping.put("number", "int64");
+    typeMapping.put("object", "FString");
+    typeMapping.put("binary", "FString");
+    typeMapping.put("password", "FString");
+    //TODO:Maybe use better formats for dateTime?
+    typeMapping.put("file", "FString");
+    typeMapping.put("DateTime", "FString");
+    typeMapping.put("Date", "FString");
+    typeMapping.put("UUID", "FString");
+    typeMapping.put("URI", "FString");
 
-        importMapping = new HashMap<String, String>();
+    importMapping = new HashMap<String, String>();
   }
 
   /**
@@ -243,50 +251,19 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
                 languageSpecificPrimitives.contains(type)) {
             return type;
         } else {
-            return Character.toUpperCase(type.charAt(0)) + type.substring(1);
+            return modelNamePrefix + Character.toUpperCase(type.charAt(0)) + type.substring(1);
         }
     }
 
     @Override
     public String toModelImport(String name) {
-        if (name.equals("FString")) {
-            return "#include <string>";
-        } else if (name.equals("std::map")) {
-            return "#include <map>";
-        } else if (name.equals("std::list")) {
-            return "#include <list>";
-        }
         return "#include \"" + name + ".h\"";
     }
 
     //Might not be needed
     @Override
     public String toDefaultValue(Schema p) {
-        if (ModelUtils.isBooleanSchema(p)) {
-            return "bool(false)";
-        } else if (ModelUtils.isNumberSchema(p)) {
-            if (SchemaTypeUtil.FLOAT_FORMAT.equals(p.getFormat())) {
-                return "float(0)";
-            }
-            return "double(0)";
-
-        } else if (ModelUtils.isIntegerSchema(p)) {
-            if (SchemaTypeUtil.INTEGER64_FORMAT.equals(p.getFormat())) {
-                return "long(0)";
-            }
-            return "int32(0)";
-        } else if (ModelUtils.isMapSchema(p)) {
-            return "new std::map()";
-        } else if (ModelUtils.isArraySchema(p)) {
-            return "new std::list()";
-        } else if (!StringUtils.isEmpty(p.get$ref())) {
-            return "new " + toModelName(ModelUtils.getSimpleRef(p.get$ref())) + "()";
-        } else if (ModelUtils.isDateSchema(p) || ModelUtils.isDateTimeSchema(p)) {
-            return "null";
-        } else if (ModelUtils.isStringSchema(p)) {
-            return "FString()";
-        }
-        return "null";
+        return "";
     }
 
 
@@ -337,7 +314,7 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
      * @return getter name based on naming convention
      */
     public String toBooleanGetter(String name) {
-        return "get" + getterAndSetterCapitalize(name);
+        return name;
     }
 
 

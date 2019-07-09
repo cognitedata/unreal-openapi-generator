@@ -1,69 +1,33 @@
-#include <map>
-#include <cstdlib>
-#include <glib-object.h>
-#include <json-glib/json-glib.h>
 #include "Helpers.h"
 
 {{#models}}{{#model}}
 #include "{{classname}}.h"
 
-using namespace std;
-using namespace Tizen::{{prefix}};
 
-{{classname}}::{{classname}}()
-{
-	//__init();
-}
-
-{{classname}}::~{{classname}}()
-{
-	//__cleanup();
-}
-
-void
-{{classname}}::__init()
-{
-	{{#vars}}
-	{{#isContainer}}
-	//{{defaultValue}}{{baseType}}> {{name}};
-	{{/isContainer}}
-	{{^isContainer}}
-	//{{name}} = {{defaultValue}};
-	{{/isContainer}}
-	{{/vars}}
-}
-
-void
-{{classname}}::__cleanup()
-{
-	//{{#vars}}if({{name}} != NULL) {
-	//{{#isContainer}}{{name}}.RemoveAll(true);{{/isContainer}}
-	//delete {{name}};
-	//{{name}} = NULL;
-	//}
-	//{{/vars}}
-}
-
-void
-{{classname}}::fromJson(char* jsonStr)
+void {{classname}}::fromJson(char* jsonStr)
 {
 	JsonObject *pJsonObject = json_node_get_object(json_from_string(jsonStr,NULL));
 	JsonNode *node;
 	{{#vars}}
 	const gchar *{{name}}Key = "{{baseName}}";
 	node = json_object_get_member(pJsonObject, {{name}}Key);
-	if (node !=NULL) {
+	if (node !=NULL)
+	{
 	{{#isContainer}}{{#isListContainer}}
 		{
 			JsonArray* arr = json_node_get_array(node);
 			JsonNode*  temp_json;
 			list<{{#items}}{{dataType}}{{/items}}> new_list;
 			{{#items}}{{dataType}}{{/items}} inst;
-			for (guint i=0;i<json_array_get_length(arr);i++) {
+			for (guint i=0;i<json_array_get_length(arr);i++)
+			{
 				temp_json = json_array_get_element(arr,i);
-				if (isprimitive("{{#items}}{{dataType}}{{/items}}")) {
+				if (isprimitive("{{#items}}{{dataType}}{{/items}}"))
+				{
 					jsonToValue(&inst, temp_json, "{{#items}}{{dataType}}{{/items}}", "");
-				} else {
+				}
+				else
+				{
 					{{#items}}{{^isInteger}}{{^isDate}}{{^isLong}}{{^isBoolean}}{{^isString}}{{^isDateTime}}{{^isDouble}}{{^isFloat}}
 					inst.fromJson(json_to_string(temp_json, false));
 					{{/isFloat}}{{/isDouble}}{{/isDateTime}}{{/isString}}{{/isBoolean}}{{/isLong}}{{/isDate}}{{/isInteger}}{{/items}}
@@ -82,9 +46,12 @@ void
 		{{/isMapContainer}}{{/isContainer}}
 		{{^isContainer}}
 
-		if (isprimitive("{{baseType}}")) {
+		if (isprimitive("{{baseType}}"))
+		{
 			jsonToValue(&{{name}}, node, "{{baseType}}", "{{complexType}}");
-		} else {
+		}
+		else
+		{
 			{{^isInteger}}{{^isDate}}{{^isLong}}{{^isBoolean}}{{^isString}}{{^isDateTime}}{{^isDouble}}{{^isFloat}}
 			{{baseType}}* obj = static_cast<{{baseType}}*> (&{{name}});
 			obj->fromJson(json_to_string(node, false));
@@ -95,29 +62,27 @@ void
 	{{/vars}}
 }
 
-{{classname}}::{{classname}}(char* json)
-{
-	this->fromJson(json);
-}
-
-char*
-{{classname}}::toJson()
+char* {{classname}}::toJson()
 {
 	JsonObject *pJsonObject = json_object_new();
 	JsonNode *node;
 	{{#vars}}
 	{{#isContainer}}
 	{{#isListContainer}}
-	if (isprimitive("{{#items}}{{dataType}}{{/items}}")) {
-		list<{{#items}}{{dataType}}{{/items}}> new_list = static_cast<list <{{#items}}{{dataType}}{{/items}}> > ({{getter}}());
+	if (isprimitive("{{#items}}{{dataType}}{{/items}}"))
+	{
+		list<{{#items}}{{dataType}}{{/items}}> new_list = static_cast<list <{{#items}}{{dataType}}{{/items}}> > ({{name}});
 		node = converttoJson(&new_list, "{{#items}}{{dataType}}{{/items}}", "{{containerType}}");
-	} else {
+	}
+	else
+	{
 		node = json_node_alloc();
-		list<{{#items}}{{dataType}}{{/items}}> new_list = static_cast<list <{{#items}}{{dataType}}{{/items}}> > ({{getter}}());
+		list<{{#items}}{{dataType}}{{/items}}> new_list = static_cast<list <{{#items}}{{dataType}}{{/items}}> > ({{name}});
 		JsonArray* json_array = json_array_new();
 		GError *mygerror;
 		{{#items}}{{^isInteger}}{{^isDate}}{{^isLong}}{{^isBoolean}}{{^isString}}{{^isDateTime}}{{^isDouble}}{{^isFloat}}
-		for (list<{{dataType}}>::iterator it = new_list.begin(); it != new_list.end(); it++) {
+		for (list<{{dataType}}>::iterator it = new_list.begin(); it != new_list.end(); it++)
+		{
 			mygerror = NULL;
 			{{dataType}} obj = *it;
 			JsonNode *node_temp = json_from_string(obj.toJson(), &mygerror);
@@ -133,7 +98,7 @@ char*
 
 	{{#isMapContainer}}{
 		JsonObject* json_obj;
-		map<string, string> new_list = static_cast<map <string, string> > ({{getter}}());
+		map<string, string> new_list = static_cast<map <string, string> > ({{name}});
 		json_obj = json_object_new();
 		for (map<string, string>::iterator it = new_list.begin(); it != new_list.end(); it++) {
 			string obj = (*it).first;
@@ -149,13 +114,15 @@ char*
 
 	{{/isContainer}}
 	{{^isContainer}}
-	if (isprimitive("{{baseType}}")) {
-		{{baseType}} obj = {{getter}}();
+	if (isprimitive("{{baseType}}"))
+	{
+		{{baseType}} obj = {{name}};
 		node = converttoJson(&obj, "{{baseType}}", "");
 	}
-	else {
+	else
+	{
 		{{^isInteger}}{{^isDate}}{{^isLong}}{{^isBoolean}}{{^isString}}{{^isDateTime}}{{^isDouble}}{{^isFloat}}
-		{{baseType}} obj = static_cast<{{baseType}}> ({{getter}}());
+		{{baseType}} obj = static_cast<{{baseType}}> ({{name}});
 		GError *mygerror;
 		mygerror = NULL;
 		node = json_from_string(obj.toJson(), &mygerror);
@@ -173,20 +140,6 @@ char*
 	return ret;
 }
 
-{{#vars}}
-{{dataType}}{{#isContainer}}{{#isMapContainer}}<string, string>{{/isMapContainer}}{{^isMapContainer}}<{{#items}}{{dataType}}{{/items}}>{{/isMapContainer}}{{/isContainer}}
-{{classname}}::{{getter}}()
-{
-	return {{name}};
-}
-
-void
-{{classname}}::{{setter}}({{dataType}} {{#isContainer}}{{#isMapContainer}}<string, string>{{/isMapContainer}}{{^isMapContainer}}<{{#items}}{{dataType}}{{/items}}>{{/isMapContainer}}{{/isContainer}} {{name}})
-{
-	this->{{name}} = {{name}};
-}
-
-{{/vars}}
 
 {{/model}}
 {{/models}}

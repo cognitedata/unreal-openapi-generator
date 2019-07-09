@@ -1,73 +1,32 @@
-{{#models}}{{#model}}/*
- * {{classname}}.h
- *
- * {{description}}
- */
+{{#models}}
+{{#model}}
+#pragma once
 
-#ifndef _{{classname}}_H_
-#define _{{classname}}_H_
-
-{{/model}}{{/models}}
+{{/model}}
+{{/models}}
 {{#imports}}
 {{{import}}}
 {{/imports}}
 #include "Object.h"
 
-/** \defgroup Models Data Structures for API
- *  Classes containing all the Data Structures needed for calling/returned by API endpoints
- *
- */
+{{#models}}
+{{#model}}
+class COGNITECDF_API {{classname}} : public Object
+{
+	GENERATED_BODY()
 
-namespace Tizen {
-namespace {{prefix}} {
-{{#models}}{{#model}}
-
-/*! \brief {{{description}}}
- *
- *  \ingroup Models
- *
- */
-
-class {{classname}} : public Object {
 public:
-	/*! \brief Constructor.
-	 */
-	{{classname}}();
-	{{classname}}(char* str);
 
-	/*! \brief Destructor.
-	 */
-	virtual ~{{classname}}();
-
-	/*! \brief Retrieve a string JSON representation of this class.
-	 */
 	char* toJson();
-
-	/*! \brief Fills in members of this class from JSON string representing it.
-	 */
 	void fromJson(char* jsonStr);
 
+
 	{{#vars}}
-	/*! \brief Get {{{description}}}
-	 */
-	{{dataType}}{{#isContainer}}{{#isMapContainer}}<std::string, std::string>{{/isMapContainer}}{{^isMapContainer}}<{{#items}}{{dataType}}{{/items}}>{{/isMapContainer}}{{/isContainer}} {{getter}}();
-
-	/*! \brief Set {{{description}}}
-	 */
-	void {{setter}}({{dataType}} {{#isContainer}}{{#isMapContainer}}<std::string, std::string>{{/isMapContainer}}{{^isMapContainer}}<{{#items}}{{dataType}}{{/items}}>{{/isMapContainer}}{{/isContainer}} {{name}});
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	{{dataType}}{{#isContainer}}{{#isMapContainer}}<FString, FString>{{/isMapContainer}}{{^isMapContainer}}<{{#items}}{{dataType}}{{/items}}>{{/isMapContainer}}{{/isContainer}} {{name}};
 	{{/vars}}
-
-private:
-	{{#vars}}
-	{{dataType}} {{#isContainer}}{{#isMapContainer}}<std::string, std::string>{{/isMapContainer}}{{^isMapContainer}}<{{#items}}{{dataType}}{{/items}}>{{/isMapContainer}}{{/isContainer}}{{name}};
-	{{/vars}}
-	void __init();
-	void __cleanup();
-
 };
 {{/model}}
 {{/models}}
-}
-}
 
-#endif /* _{{classname}}_H_ */
