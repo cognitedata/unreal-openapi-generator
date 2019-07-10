@@ -27,6 +27,7 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
   protected String sourceFolder = "src";
   protected String documentationFolder = "doc";
   protected String apiVersion = "1.0.0";
+  protected String fileNamePrefix = "CDF_API_";
 
   public UnrealCodegenGenerator() {
     super();
@@ -50,7 +51,7 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
      */
     templateDir = "unreal-codegen";
 
-    modelNamePrefix = "UCognite";
+    modelNamePrefix = "U" + fileNamePrefix;
 
 
     modelTemplateFiles.put("model-header.mustache", ".h");
@@ -191,10 +192,25 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
 
 
 
+  @Override
+  public Map<String, Object> postProcessModels(Map<String, Object> objs) {
+     super.postProcessModels(objs);
+      return postProcessModelsEnum(objs);
+  }
 
+    @Override
+    public String toEnumVarName(String value, String datatype) {
+        if (value.length() == 0) {
+            return "EMPTY";
+        }
 
-
-
+        String var = value.replaceAll("\\W+", "_");
+        if (var.matches("\\d.*")) {
+            return "_" + var;
+        } else {
+            return var;
+        }
+    }
 
 
   @Override
@@ -205,15 +221,6 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
             return instantiationTypes.get("array");
         } else {
             return null;
-        }
-    }
-
-    @Override
-    public String getTypeDeclaration(String name) {
-        if (languageSpecificPrimitives.contains(name)) {
-            return name;
-        } else {
-            return name + "";
         }
     }
 
@@ -238,7 +245,7 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
         if (languageSpecificPrimitives.contains(openAPIType)) {
             return toModelName(openAPIType);
         } else {
-            return openAPIType + "";
+            return openAPIType;
         }
     }
 
@@ -251,7 +258,7 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
                 languageSpecificPrimitives.contains(type)) {
             return type;
         } else {
-            return modelNamePrefix + Character.toUpperCase(type.charAt(0)) + type.substring(1);
+            return getModelNamePrefix() + Character.toUpperCase(type.charAt(0)) + type.substring(1);
         }
     }
 
@@ -269,7 +276,7 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
 
     @Override
     public String toModelFilename(String name) {
-        return camelize(name);
+        return fileNamePrefix + camelize(name);
     }
 
     @Override

@@ -1,6 +1,7 @@
+{{#models}}{{#model}}
+{{^isEnum}}
 #include "Helpers.h"
 
-{{#models}}{{#model}}
 #include "{{classname}}.h"
 
 
@@ -140,6 +141,6 @@ char* {{classname}}::toJson()
 	return ret;
 }
 
-
+{{/isEnum}}
 {{/model}}
 {{/models}}

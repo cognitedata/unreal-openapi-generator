@@ -2,15 +2,19 @@
 {{#model}}
 #pragma once
 
+#include "Object.h"
 {{/model}}
 {{/models}}
 {{#imports}}
 {{{import}}}
 {{/imports}}
-#include "Object.h"
-
 {{#models}}
 {{#model}}
+
+{{^isEnum}}
+#include "{{classFilename}}.generated.h"
+
+UCLASS(Blueprintable, BlueprintType)
 class COGNITECDF_API {{classname}} : public Object
 {
 	GENERATED_BODY()
@@ -21,12 +25,39 @@ public:
 	void fromJson(char* jsonStr);
 
 
-	{{#vars}}
-	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	{{dataType}}{{#isContainer}}{{#isMapContainer}}<FString, FString>{{/isMapContainer}}{{^isMapContainer}}<{{#items}}{{dataType}}{{/items}}>{{/isMapContainer}}{{/isContainer}} {{name}};
-	{{/vars}}
+
+	/**
+	* Required parameters
+	*/
+
+	{{#requiredVars}}
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Meta(ExposeOnSpawn=true))
+	{{dataType}}{{#isModel}}*{{/isModel}}{{#isContainer}}{{#isMapContainer}}< FString, {{#items}}{{dataType}}{{#isModel}}*{{/isModel}}{{/items}} >{{/isMapContainer}}{{^isMapContainer}}< {{#items}}{{dataType}}{{#isModel}}*{{/isModel}}{{/items}} >{{/isMapContainer}}{{/isContainer}} {{name}};
+
+	{{/requiredVars}}
+
+	/**
+	* Optional parameters
+	*/
+
+	{{#optionalVars}}
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Meta(ExposeOnSpawn=true))
+	TOptional< {{dataType}}{{#isModel}}*{{/isModel}}{{#isContainer}}{{#isMapContainer}}< FString, {{#items}}{{dataType}}{{#isModel}}*{{/isModel}}{{/items}} >{{/isMapContainer}}{{^isMapContainer}}< {{#items}}{{dataType}}{{#isModel}}*{{/isModel}}{{/items}} >{{/isMapContainer}}{{/isContainer}} > {{name}};
+
+	{{/optionalVars}}
 };
+{{/isEnum}}
+{{#isEnum}}
+UENUM(BlueprintType)
+enum class {{classname}} : uint8
+{
+  	{{#allowableValues}}
+	{{#enumVars}}
+	{{name}}{{^-last}},{{/-last}}
+	{{/enumVars}}
+	{{/allowableValues}}
+};
+{{/isEnum}}
 {{/model}}
 {{/models}}
 
