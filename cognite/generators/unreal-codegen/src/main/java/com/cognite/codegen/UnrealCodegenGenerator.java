@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
+
 import static org.openapitools.codegen.utils.StringUtils.camelize;
 
 public class UnrealCodegenGenerator extends AbstractCppCodegen implements CodegenConfig {
@@ -32,9 +33,9 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
   public UnrealCodegenGenerator() {
     super();
 
-
     
-
+    cliOptions.add(CliOption.newBoolean("disableHtmlEscaping", "Disable HTML escaping of JSON strings when using gson (needed to avoid problems with byte[] fields)", true));
+    additionalProperties.put("disableHtmlEscaping", true);
     // set the output folder here
     outputFolder = "generated-code/unreal-codegen";
     /**
@@ -51,8 +52,7 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
      */
     templateDir = "unreal-codegen";
 
-    modelNamePrefix = "U" + fileNamePrefix;
-
+    modelNamePrefix = fileNamePrefix;
 
     modelTemplateFiles.put("model-header.mustache", ".h");
     modelTemplateFiles.put("model-body.mustache", ".cpp");
@@ -191,13 +191,6 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
   }
 
 
-
-  @Override
-  public Map<String, Object> postProcessModels(Map<String, Object> objs) {
-     super.postProcessModels(objs);
-      return postProcessModelsEnum(objs);
-  }
-
     @Override
     public String toEnumVarName(String value, String datatype) {
         if (value.length() == 0) {
@@ -211,8 +204,6 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
             return var;
         }
     }
-
-
   @Override
     public String toInstantiationType(Schema p) {
         if (ModelUtils.isMapSchema(p)) {
@@ -225,28 +216,64 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
     }
 
     @Override
+    public CodegenModel fromModel(String name, Schema schema) {
+        CodegenModel newModel = super.fromModel(name, schema);
+        if ( newModel.isEnum ) {
+            newModel.classname = "E" + newModel.classname;
+        } else {
+            newModel.classname = "F" + newModel.classname;
+        }
+        return newModel;
+    }
+
+    @Override
     public String getSchemaType(Schema p) {
         String openAPIType = super.getSchemaType(p);
         String type = null;
         if (typeMapping.containsKey(openAPIType)) {
             type = typeMapping.get(openAPIType);
             if (languageSpecificPrimitives.contains(type)) {
-                return toModelName(type);
+                return type;
             }
         } else {
-            type = openAPIType;
+            type = openAPIType;    
         }
-        return toModelName(type);
+        return type;
     }
 
     @Override
     public String getTypeDeclaration(Schema p) {
         String openAPIType = getSchemaType(p);
-        if (languageSpecificPrimitives.contains(openAPIType)) {
-            return toModelName(openAPIType);
+        if (typeMapping.containsKey(openAPIType)) {
+            String type = typeMapping.get(openAPIType);
+            if (languageSpecificPrimitives.contains(type)) {
+                return toModelName(type);
+            }
         } else {
-            return openAPIType;
+            Map<String, Schema> allDefinitions = ModelUtils.getSchemas(this.openAPI);
+            Schema openAPISchema = allDefinitions == null ? null : allDefinitions.get(openAPIType);
+            if ( openAPISchema != null ) {
+                if ( openAPISchema.getEnum() != null && !openAPISchema.getEnum().isEmpty()) {
+                    return "E" + toModelName(openAPIType);
+                } else {
+                    return "F" + toModelName(openAPIType);
+                }
+            }
         }
+        return toModelName(openAPIType);
+    }
+
+    public CodegenProperty fromProperty(String name, Schema p) {
+        CodegenProperty newProperty = super.fromProperty(name, p);
+        Map<String, Schema> allDefinitions = ModelUtils.getSchemas(this.openAPI);
+        Schema openAPISchema = allDefinitions == null ? null : allDefinitions.get(newProperty.openApiType);
+        if ( openAPISchema != null ) {
+            if ( openAPISchema.getEnum() != null && !openAPISchema.getEnum().isEmpty()) {
+                newProperty.isEnum = true;
+            }
+        }
+
+        return newProperty;
     }
 
     @Override
@@ -258,7 +285,7 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
                 languageSpecificPrimitives.contains(type)) {
             return type;
         } else {
-            return getModelNamePrefix() + Character.toUpperCase(type.charAt(0)) + type.substring(1);
+            return getModelNamePrefix() + type;//Character.toUpperCase(type.charAt(0)) + type.substring(1);
         }
     }
 

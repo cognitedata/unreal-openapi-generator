@@ -14,16 +14,13 @@
 {{^isEnum}}
 #include "{{classFilename}}.generated.h"
 
-UCLASS(Blueprintable, BlueprintType)
-class COGNITECDF_API {{classname}} : public Object
+USTRUCT()
+struct COGNITECDF_API {{classname}} : public Object
 {
 	GENERATED_BODY()
 
-public:
-
 	char* toJson();
 	void fromJson(char* jsonStr);
-
 
 
 	/**
@@ -31,19 +28,15 @@ public:
 	*/
 
 	{{#requiredVars}}
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Meta(ExposeOnSpawn=true))
-	{{dataType}}{{#isModel}}*{{/isModel}}{{#isContainer}}{{#isMapContainer}}< FString, {{#items}}{{dataType}}{{#isModel}}*{{/isModel}}{{/items}} >{{/isMapContainer}}{{^isMapContainer}}< {{#items}}{{dataType}}{{#isModel}}*{{/isModel}}{{/items}} >{{/isMapContainer}}{{/isContainer}} {{name}};
-
+	{{#isContainer}}{{dataType}}{{#isMapContainer}}< FString, {{#items}}{{#isModel}}{{#isEnum}}TEnumAsByte<{{/isEnum}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{/items}}>{{/isMapContainer}}{{^isMapContainer}}<{{#items}}{{#isModel}}{{#isEnum}}TEnumAsByte<{{/isEnum}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}>{{/isModel}}{{/items}}>{{/isMapContainer}}{{/isContainer}}{{^isContainer}}{{#isModel}}{{#isEnum}}TEnumAsByte<{{/isEnum}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}>{{/isModel}}{{/isContainer}} {{name}};
 	{{/requiredVars}}
-
+	
 	/**
 	* Optional parameters
 	*/
 
 	{{#optionalVars}}
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Meta(ExposeOnSpawn=true))
-	TOptional< {{dataType}}{{#isModel}}*{{/isModel}}{{#isContainer}}{{#isMapContainer}}< FString, {{#items}}{{dataType}}{{#isModel}}*{{/isModel}}{{/items}} >{{/isMapContainer}}{{^isMapContainer}}< {{#items}}{{dataType}}{{#isModel}}*{{/isModel}}{{/items}} >{{/isMapContainer}}{{/isContainer}} > {{name}};
-
+	TOptional<{{#isContainer}}{{dataType}}{{#isMapContainer}}<FString, {{#items}}{{#isModel}}{{#isEnum}}TEnumAsByte<{{/isEnum}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}>{{/isModel}}{{/items}}>{{/isMapContainer}}{{^isMapContainer}}<{{#items}}{{#isModel}}{{#isEnum}}TEnumAsByte<{{/isEnum}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}>{{/isModel}}{{/items}}>{{/isMapContainer}}{{/isContainer}}{{^isContainer}}{{#isModel}}{{#isEnum}}TEnumAsByte<{{/isEnum}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}>{{/isModel}}{{/isContainer}}> {{name}};
 	{{/optionalVars}}
 };
 {{/isEnum}}
