@@ -22,13 +22,12 @@ struct COGNITECDF_API {{classname}} : public Object
 	char* toJson();
 	void fromJson(char* jsonStr);
 
-
 	/**
 	* Required parameters
 	*/
-
+	
 	{{#requiredVars}}
-	{{#isContainer}}{{dataType}}{{#isMapContainer}}< FString, {{#items}}{{#isModel}}{{#isEnum}}TEnumAsByte<{{/isEnum}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{/items}}>{{/isMapContainer}}{{^isMapContainer}}<{{#items}}{{#isModel}}{{#isEnum}}TEnumAsByte<{{/isEnum}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}>{{/isModel}}{{/items}}>{{/isMapContainer}}{{/isContainer}}{{^isContainer}}{{#isModel}}{{#isEnum}}TEnumAsByte<{{/isEnum}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}>{{/isModel}}{{/isContainer}} {{name}};
+	{{#isContainer}}{{dataType}}{{#isMapContainer}}< FString, {{#items}}{{#isModel}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}{{^isEnum}}>{{/isEnum}}{{/isModel}}{{/items}}>{{/isMapContainer}}{{^isMapContainer}}<{{#items}}{{#isModel}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}{{^isEnum}}>{{/isEnum}}{{/isModel}}{{/items}}>{{/isMapContainer}}{{/isContainer}}{{^isContainer}}{{#isModel}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}{{^isEnum}}>{{/isEnum}}{{/isModel}}{{/isContainer}} {{name}};
 	{{/requiredVars}}
 	
 	/**
@@ -36,7 +35,7 @@ struct COGNITECDF_API {{classname}} : public Object
 	*/
 
 	{{#optionalVars}}
-	TOptional<{{#isContainer}}{{dataType}}{{#isMapContainer}}<FString, {{#items}}{{#isModel}}{{#isEnum}}TEnumAsByte<{{/isEnum}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}>{{/isModel}}{{/items}}>{{/isMapContainer}}{{^isMapContainer}}<{{#items}}{{#isModel}}{{#isEnum}}TEnumAsByte<{{/isEnum}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}>{{/isModel}}{{/items}}>{{/isMapContainer}}{{/isContainer}}{{^isContainer}}{{#isModel}}{{#isEnum}}TEnumAsByte<{{/isEnum}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}>{{/isModel}}{{/isContainer}}> {{name}};
+	TOptional<{{#isContainer}}{{dataType}}{{#isMapContainer}}< FString, {{#items}}{{#isModel}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}{{^isEnum}}>{{/isEnum}}{{/isModel}}{{/items}}>{{/isMapContainer}}{{^isMapContainer}}<{{#items}}{{#isModel}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}{{^isEnum}}>{{/isEnum}}{{/isModel}}{{/items}}>{{/isMapContainer}}{{/isContainer}}{{^isContainer}}{{#isModel}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}{{^isEnum}}>{{/isEnum}}{{/isModel}}{{/isContainer}}> {{name}};
 	{{/optionalVars}}
 };
 {{/isEnum}}

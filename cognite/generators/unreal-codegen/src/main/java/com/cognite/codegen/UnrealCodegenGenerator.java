@@ -285,8 +285,14 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
                 languageSpecificPrimitives.contains(type)) {
             return type;
         } else {
-            return getModelNamePrefix() + type;//Character.toUpperCase(type.charAt(0)) + type.substring(1);
+            return getModelNamePrefix() + Character.toUpperCase(type.charAt(0)) + type.substring(1);
         }
+    }
+
+    @Override	
+    public Map<String, Object> postProcessModels(Map<String, Object> objs) {	
+        super.postProcessModels(objs);	
+        return postProcessModelsEnum(objs);	
     }
 
     @Override
