@@ -1,0 +1,673 @@
+openapi: 3.0.0
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: 'https://virtserver.swaggerhub.com/glebcognite/TwinConfiguration/1.0.0'
+info:
+  description: This is a simple API
+  version: 1.0.0
+  title: Simple Inventory API
+  contact:
+    email: you@your-company.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+paths:
+  /inventory:
+    get:
+      summary: searches inventory
+      operationId: searchInventory
+      description: |
+        By passing in the appropriate options, you can search for
+        available inventory in the system
+      responses:
+        '200':
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/twinConfiguration'
+        '400':
+          description: bad input parameter
+
+
+
+
+
+
+
+
+components:
+  schemas:
+
+
+     twinConfiguration:
+      required:
+        - header
+        - assets
+        - scenes
+      type: object
+      properties:
+        header:
+          $ref: '#/components/schemas/header'
+        assets:
+          $ref: '#/components/schemas/assets'
+        scenes:
+          type: array
+          items:
+            $ref: '#/components/schemas/scene'
+        hierarchy:
+          $ref: '#/components/schemas/menuHierarchy'
+
+     header:
+      required:
+        - name
+        - version
+      type: object
+      properties:
+        name:
+          type: string
+        thumbnailImageId:
+          type: integer
+          format: int64
+        version:
+          type: number
+          format: float
+
+     assets:
+      type: object
+      properties:
+        geometries:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/geometry'
+        images:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/image'
+        splines:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/spline'
+        materials:
+          type: array
+          items:
+            $ref: '#/components/schemas/material'
+
+     geometry:
+      type: object
+      required:
+        - modelID
+        - revisionID
+      properties:
+        modelID:
+          type: integer
+          format: int64
+        revisionID:
+          type: integer
+          format: int64
+        transform:
+          $ref: '#/components/schemas/relativeTransform'
+        colorOverride:
+          $ref: '#/components/schemas/color'
+        materialId:
+          type: array
+          items:
+            type: integer
+            format: int32
+        treeIndex:
+          type: array
+          items:
+            type: integer
+            format: int32
+
+     image:
+      type: object
+      required:
+        - isMipMapped
+        - fileType
+      properties:
+        isMipMapped:
+          type: boolean
+        fileType:
+          type: string
+
+     spline:
+      type: object
+      required:
+        - splinePoints
+      properties:
+        splinePoints:
+          type: array
+          items:
+            type: number
+            format: float
+
+     material:
+      type: object
+      properties:
+        emissive:
+          type: integer
+          format: int64
+        diffuse:
+          type: integer
+          format: int64
+        metallic:
+          type: integer
+          format: int64
+        roughness:
+          type: integer
+          format: int64
+        normal:
+          type: integer
+          format: int64
+
+
+     baseMenuHierarchy:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/menuHierarchyType'
+
+     fullAssetHierarchy:
+      allOf:
+        - $ref: '#/components/schemas/baseMenuHierarchy'
+        - type: object
+          properties:
+            rootAssetId:
+              type: integer
+              format: int64
+
+     customMenuHierarchy:
+      allOf:
+        - $ref: '#/components/schemas/baseMenuHierarchy'
+        - type: object
+          required:
+            - children
+          properties:
+            children:
+              type: array
+              items:
+                $ref: '#/components/schemas/customMenuHierarchyNode'
+
+     customMenuHierarchyNode:
+      type: object
+      properties:
+        displayName:
+          type: string
+        assetInternalId:
+          type: integer
+          format: int64
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/customMenuHierarchyNode'
+
+     menuHierarchyType:
+      type: string
+      enum:
+        - fullAssetHierarchy
+        - customHierarchy
+
+     menuHierarchy:
+      oneOf:
+        - $ref: '#/components/schemas/fullAssetHierarchy'
+        - $ref: '#/components/schemas/customMenuHierarchy'
+      discriminator:
+        propertyName: type
+        mapping:
+          fullAssetHierarchy: '#/components/schemas/fullAssetHierarchy'
+          customHierarchy: '#/components/schemas/customMenuHierarchy'
+
+     scene:
+      type: object
+      required:
+        - coordinates
+      properties:
+        coordinates:
+          type: object
+        cameraCoordinates:
+          type: object
+        twinActors:
+          type: array
+          items:
+            type: object
+        terrains:
+          type: array
+          items:
+            $ref: '#/components/schemas/terrain'
+        heightRenderer:
+          $ref: '#/components/schemas/heightRenderer'
+        splineActors:
+          type: array
+          items:
+            $ref: '#/components/schemas/splineActor'
+        widgetActors:
+          type: array
+          items:
+            $ref: '#/components/schemas/widgetActor'
+        graphicalLayers:
+          type: array
+          items:
+            $ref: '#/components/schemas/graphicalLayer'
+        waterPlane:
+          $ref: '#/components/schemas/waterPlane'
+        environmentControl:
+          $ref: '#/components/schemas/environmentControl'
+        viewModes:
+          type: array
+          items:
+            type: object
+
+     terrain:
+      type: object
+      required:
+        - transform
+      properties:
+        transform:
+          $ref: '#/components/schemas/baseTransform'
+        heightMap:
+          type: string
+        normalMapMap:
+          type: string
+        baseColor:
+          type: string
+        terrainMinHeight:
+          type: number
+          format: float
+        terrainMaxHeight:
+          type: number
+          format: float
+        heightMapMinValue:
+          type: number
+          format: float
+        heightMapMaxValue:
+          type: number
+          format: float
+        loDScreenSizeFactor:
+          type: number
+          format: float
+        tileSizeScale:
+          type: number
+          format: float
+        metersPerPixel:
+          type: number
+          format: float
+        numTilesX:
+          type: integer
+          format: int32
+        numTilesY:
+          type: integer
+          format: int32
+
+
+     widgetRotationMode:
+      type: string
+      enum:
+        - noRotation
+        - faceCamera
+        - faceCamera_ZOnly
+        - faceCamera_HorizontalAlignment
+
+     widgetBase:
+      required:
+        - type
+        - content
+      properties:
+        type:
+          $ref: '#/components/schemas/widgetType'
+        content:
+          type: string
+        assetId:
+          type: integer
+          format: int64
+        minScreenSize:
+          type: number
+          format: float
+        cutOffDistance:
+          type: number
+          format: float
+        fadeDistance:
+          type: number
+          format: float
+        transform:
+          $ref: '#/components/schemas/relativeTransform'
+        rotationMode:
+          $ref: '#/components/schemas/widgetRotationMode'
+
+     widgetText:
+      allOf:
+        - $ref: '#/components/schemas/widgetBase'
+        - type: object
+          properties:
+            color:
+              $ref: '#/components/schemas/color'
+            size:
+              type: number
+              format: float
+            outlineSize:
+              type: number
+              format: float
+            outlineColor:
+              $ref: '#/components/schemas/color'
+            typeface:
+              type: string
+            shadowColor:
+              $ref: '#/components/schemas/color'
+            shadowOffsetX:
+              type: number
+              format: float
+            shadowOffsetY:
+              type: number
+              format: float
+            backgroundColor:
+              $ref: '#/components/schemas/color'
+
+     widgetType:
+      type: string
+      enum:
+        - text
+
+     widget:
+      oneOf:
+        - $ref: '#/components/schemas/widgetText'
+      discriminator:
+        propertyName: type
+        mapping:
+          text: '#/components/schemas/widgetText'
+
+
+     transfromSensorBase:
+      type: object
+      required:
+        - type
+      discriminator:
+        propertyName: type
+        mapping:
+          latLongSeparate: '#/components/schemas/latLongSeparateSensor'
+      properties:
+        type:
+          $ref: '#/components/schemas/transformSensorType'
+
+     heightTrackingMode:
+      type: string
+      enum:
+        - none
+        - constantValue
+        - heightmapData
+
+     latLongSeparateSensor:
+      allOf:
+        - $ref: '#/components/schemas/transfromSensorBase'
+        - type: object
+          required:
+            - latitudeTimeSeriesName
+            - longitudeTimeSeriesName
+            - heightTrackingMode
+          properties:
+            latitudeTimeSeriesName:
+              type: string
+            longitudeTimeSeriesName:
+              type: string
+            heightTrackingMode:
+              $ref: '#/components/schemas/heightTrackingMode'
+            defaultHeightPosition:
+              type: number
+              format: float
+            simulateRotationFromPosition:
+              type: boolean
+
+     transformSensorType:
+      type: string
+      enum:
+        - latLongSeparate
+   
+
+     actorBase:
+      type: object
+      discriminator: dummyDiscriminator
+      required:
+        - name
+        - transform
+      properties:
+        name:
+          type: string
+        transform:
+          $ref: '#/components/schemas/baseTransform'
+        widgets:
+          type: array
+          items:
+            $ref: '#/components/schemas/widget'
+        positionSensors:
+          type: array
+          items:
+            $ref: '#/components/schemas/transfromSensorBase'
+        hiddenByDefault:
+          type: boolean
+
+     twinActor:
+      allOf:
+        - $ref: '#/components/schemas/actorBase'
+        - type: object
+          required:
+            - geometry
+          properties:
+            geometry:
+              type: string
+
+
+     splineType:
+      type: string
+      enum:
+        - noTangents
+        - withTangents
+
+     splineActor:
+      allOf:
+        - $ref: '#/components/schemas/actorBase'
+        - type: object
+          required:
+            - splineAssetID
+            - splineType
+            - radius
+            - color
+          properties:
+            splineAssetID:
+              type: string
+            splineType:
+              $ref: '#/components/schemas/splineType'
+            radius:
+              type: number
+              format: float
+            color:
+              $ref: '#/components/schemas/color'
+
+     widgetActor:
+      allOf:
+        - $ref: '#/components/schemas/actorBase'
+        - type: object
+
+     heightRenderer:
+      type: object
+      required:
+        - location
+        - orthoWidth
+        - textureSize
+      properties:
+        location:
+          type: array
+          items:
+            type: number
+            format: float
+        orthoWidth:
+          type: number
+          format: float
+        textureSize:
+          type: integer
+          format: int32
+
+     graphicalLayer:
+      allOf:
+        - $ref: '#/components/schemas/actorBase'
+        - type: object
+          required:
+            - size
+            - textureSize
+            - imageId
+          properties:
+            size:
+              type: number
+              format: float
+            textureSize:
+              type: integer
+              format: int32
+            imageId:
+              type: integer
+              format: int64
+            resourcePath:
+              type: string
+
+     waterPlane:
+      type: object
+      properties:
+        followCamera:
+          type: boolean
+        heightZoomFactor:
+          type: number
+          format: float
+        minimumHeight:
+          type: number
+          format: float
+        transform:
+          $ref: '#/components/schemas/baseTransform'
+
+     environmentControl:
+      type: object
+      properties:
+        fogInscatteringColor:
+          $ref: '#/components/schemas/color'
+        useDynamicLighting:
+          type: boolean
+        renderSkySphere:
+          type: boolean
+
+     viewMode:
+      type: object
+      required:
+        - name
+        - actorNames
+      properties:
+        name:
+          type: string
+        actorNames:
+          type: array
+          items:
+            type: string
+
+     absoluteTransformType:
+      type: string
+      enum:
+        - unrealTransform
+        - latlongTransform
+
+     baseTransform:
+      type: object
+      required:
+        - type
+      discriminator:
+        propertyName: type
+        mapping:
+          unrealTransform: '#/components/schemas/unrealTransform'
+          latlongTransform: '#/components/schemas/latlongTransform'
+      properties:
+        type:
+          $ref: '#/components/schemas/absoluteTransformType'
+        
+
+     unrealTransform:
+      anyOf:
+        - $ref: '#/components/schemas/baseTransform'
+      type: object
+      required:
+        - position
+        - rotation
+        - scale
+      properties:
+        position:
+          type: array
+          items:
+            type: number
+            format: float
+        rotation:
+          type: array
+          items:
+            type: number
+            format: float
+        scale:
+          type: array
+          items:
+            type: number
+            format: float
+
+     latlongTransform:
+      allOf:
+        - $ref: '#/components/schemas/baseTransform'
+        - type: object
+          required:
+            - latitude
+            - longitude
+            - rotation
+            - scale
+          properties:
+            latitude:
+              type: number
+              format: float
+            longitude:
+              type: number
+              format: float
+            rotation:
+              type: array
+              items:
+                type: number
+                format: float
+            scale:
+              type: array
+              items:
+                type: number
+                format: float
+     
+
+     relativeTransform:
+      type: object
+      required:
+        - position
+        - rotation
+        - scale
+      properties:
+        position:
+          type: array
+          items:
+            type: number
+            format: float
+        rotation:
+          type: array
+          items:
+            type: number
+            format: float
+        scale:
+          type: array
+          items:
+            type: number
+            format: float
+
+
+     color:
+      type: string
+      description: "hex color"
+
+
+
+

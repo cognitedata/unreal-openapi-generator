@@ -1,144 +1,46 @@
 {{#models}}{{#model}}
 {{^isEnum}}
-#include "Helpers.h"
+#include "Json.h"
+#include "JsonUtilities.h"
 
-#include "{{classname}}.h"
+#include "{{classFilename}}.h"
 
 
-void {{classname}}::fromJson(char* jsonStr)
+void {{classname}}::SerializeToJson(TSharedPtr<FJsonObject>& OutJsonObject) const
 {
-	JsonObject *pJsonObject = json_node_get_object(json_from_string(jsonStr,NULL));
-	JsonNode *node;
-	{{#vars}}
-	const gchar *{{name}}Key = "{{baseName}}";
-	node = json_object_get_member(pJsonObject, {{name}}Key);
-	if (node !=NULL)
-	{
-	{{#isContainer}}{{#isListContainer}}
-		{
-			JsonArray* arr = json_node_get_array(node);
-			JsonNode*  temp_json;
-			list<{{#items}}{{dataType}}{{/items}}> new_list;
-			{{#items}}{{dataType}}{{/items}} inst;
-			for (guint i=0;i<json_array_get_length(arr);i++)
-			{
-				temp_json = json_array_get_element(arr,i);
-				if (isprimitive("{{#items}}{{dataType}}{{/items}}"))
-				{
-					jsonToValue(&inst, temp_json, "{{#items}}{{dataType}}{{/items}}", "");
-				}
-				else
-				{
-					{{#items}}{{^isInteger}}{{^isDate}}{{^isLong}}{{^isBoolean}}{{^isString}}{{^isDateTime}}{{^isDouble}}{{^isFloat}}
-					inst.fromJson(json_to_string(temp_json, false));
-					{{/isFloat}}{{/isDouble}}{{/isDateTime}}{{/isString}}{{/isBoolean}}{{/isLong}}{{/isDate}}{{/isInteger}}{{/items}}
-				}
-				new_list.push_back(inst);
-			}
-			{{name}} = new_list;
-		}
-		{{/isListContainer}}{{#isMapContainer}}
-		{
-			JsonObject* json_obj = json_node_get_object(node);
-			map<string,string> new_map;
-			json_object_foreach_member(json_obj,helper_func,&new_map);
-			{{name}} = new_map;
-		}
-		{{/isMapContainer}}{{/isContainer}}
-		{{^isContainer}}
+	Super::SerializeToJson(OutJsonObject)
 
-		if (isprimitive("{{baseType}}"))
-		{
-			jsonToValue(&{{name}}, node, "{{baseType}}", "{{complexType}}");
-		}
-		else
-		{
-			{{^isInteger}}{{^isDate}}{{^isLong}}{{^isBoolean}}{{^isString}}{{^isDateTime}}{{^isDouble}}{{^isFloat}}
-			{{baseType}}* obj = static_cast<{{baseType}}*> (&{{name}});
-			obj->fromJson(json_to_string(node, false));
-			{{/isFloat}}{{/isDouble}}{{/isDateTime}}{{/isString}}{{/isBoolean}}{{/isLong}}{{/isDate}}{{/isInteger}}
-		}
-		{{/isContainer}}
-	}
+	{{#vars}}
+	SetField(OutJsonObject, TEXT("{{name}}"), {{name}});
 	{{/vars}}
 }
 
-char* {{classname}}::toJson()
+bool {{classname}}::InitFromJson(const TSharedPtr<FJsonObject>& JsonObject)
 {
-	JsonObject *pJsonObject = json_object_new();
-	JsonNode *node;
-	{{#vars}}
-	{{#isContainer}}
-	{{#isListContainer}}
-	if (isprimitive("{{#items}}{{dataType}}{{/items}}"))
-	{
-		list<{{#items}}{{dataType}}{{/items}}> new_list = static_cast<list <{{#items}}{{dataType}}{{/items}}> > ({{name}});
-		node = converttoJson(&new_list, "{{#items}}{{dataType}}{{/items}}", "{{containerType}}");
-	}
-	else
-	{
-		node = json_node_alloc();
-		list<{{#items}}{{dataType}}{{/items}}> new_list = static_cast<list <{{#items}}{{dataType}}{{/items}}> > ({{name}});
-		JsonArray* json_array = json_array_new();
-		GError *mygerror;
-		{{#items}}{{^isInteger}}{{^isDate}}{{^isLong}}{{^isBoolean}}{{^isString}}{{^isDateTime}}{{^isDouble}}{{^isFloat}}
-		for (list<{{dataType}}>::iterator it = new_list.begin(); it != new_list.end(); it++)
-		{
-			mygerror = NULL;
-			{{dataType}} obj = *it;
-			JsonNode *node_temp = json_from_string(obj.toJson(), &mygerror);
-			json_array_add_element(json_array, node_temp);
-			g_clear_error(&mygerror);
-		}
-		json_node_init_array(node, json_array);
-		json_array_unref(json_array);
-		{{/isFloat}}{{/isDouble}}{{/isDateTime}}{{/isString}}{{/isBoolean}}{{/isLong}}{{/isDate}}{{/isInteger}}{{/items}}
-	}
-	{{/isListContainer}}
+	const bool bSuccess = true && Super::InitFromJson(JsonObject)
+	{{#vars}}{{#required}}
+		{{^isEnum}}
+		&& TryGetField(JsonObject, TEXT("{{name}}"), {{name}})
+			{{/isEnum}}
+			{{#isEnum}}
+		&& TRY_GET_JSON_ENUM_FIELD({{dataType}}, JsonObject, TEXT("{{name}}"), {{name}})
+			{{/isEnum}}
+	{{/required}}{{/vars}}
+		;
+	
+	if (!bSuccess)
+		return false;
 
+	{{#vars}}{{^required}}
+		{{^isEnum}}
+	TryGetOptionalField(JsonObject, TEXT("{{name}}"), {{name}});
+		{{/isEnum}}
+		{{#isEnum}}
+	TRY_GET_JSON_ENUM_FIELD({{dataType}}, JsonObject, TEXT("{{name}}"), {{name}})
+		{{/isEnum}}
+	{{/required}}{{/vars}}
 
-	{{#isMapContainer}}{
-		JsonObject* json_obj;
-		map<string, string> new_list = static_cast<map <string, string> > ({{name}});
-		json_obj = json_object_new();
-		for (map<string, string>::iterator it = new_list.begin(); it != new_list.end(); it++) {
-			string obj = (*it).first;
-			string obj2 = (*it).second;
-			JsonNode* tempnode = json_from_string(obj2.c_str(),NULL);
-			json_object_set_member(json_obj, obj.c_str(), tempnode);
-		}
-	node = json_node_alloc();
-	json_node_init_object(node, json_obj);
-	json_object_unref(json_obj);
-	}
-	{{/isMapContainer}}
-
-	{{/isContainer}}
-	{{^isContainer}}
-	if (isprimitive("{{baseType}}"))
-	{
-		{{baseType}} obj = {{name}};
-		node = converttoJson(&obj, "{{baseType}}", "");
-	}
-	else
-	{
-		{{^isInteger}}{{^isDate}}{{^isLong}}{{^isBoolean}}{{^isString}}{{^isDateTime}}{{^isDouble}}{{^isFloat}}
-		{{baseType}} obj = static_cast<{{baseType}}> ({{name}});
-		GError *mygerror;
-		mygerror = NULL;
-		node = json_from_string(obj.toJson(), &mygerror);
-		{{/isFloat}}{{/isDouble}}{{/isDateTime}}{{/isString}}{{/isBoolean}}{{/isLong}}{{/isDate}}{{/isInteger}}
-	}
-	{{/isContainer}}
-	const gchar *{{name}}Key = "{{baseName}}";
-	json_object_set_member(pJsonObject, {{name}}Key, node);
-	{{/vars}}
-	node = json_node_alloc();
-	json_node_init(node, JSON_NODE_OBJECT);
-	json_node_take_object(node, pJsonObject);
-	char * ret = json_to_string(node, false);
-	json_node_free(node);
-	return ret;
+	return true;
 }
 
 {{/isEnum}}

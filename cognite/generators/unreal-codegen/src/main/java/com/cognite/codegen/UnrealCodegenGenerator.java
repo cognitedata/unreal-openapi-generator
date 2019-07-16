@@ -53,6 +53,10 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
     templateDir = "unreal-codegen";
 
     modelNamePrefix = fileNamePrefix;
+    
+    supportsInheritance = true;
+    supportsMultipleInheritance = false;
+
 
     modelTemplateFiles.put("model-header.mustache", ".h");
     modelTemplateFiles.put("model-body.mustache", ".cpp");
@@ -70,7 +74,7 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
               "protected", "public", "register", "reinterpret_cast", "requires", "return", "short", "signed",
               "sizeof", "static", "static_assert", "static_cast", "struct", "switch", "synchronized", "template",
               "this", "thread_local", "throw", "true", "try", "typedef", "typeid", "typename", "union",
-              "unsigned", "using", "virtual", "void", "volatile", "wchar_t", "while", "xor", "xor_eq"
+              "unsigned", "using", "virtual", "void", "volatile", "wchar_t", "while", "xor", "xor_eq", "int64", "uint32", "uint64", "FString", "TArray", "TMap"
       ));
 
     /**
@@ -91,10 +95,7 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
     supportingFiles.add(new SupportingFile("netclient-body.mustache", sourceFolder, "NetClient.cpp"));
     supportingFiles.add(new SupportingFile("object.mustache", sourceFolder, "Object.h"));
     supportingFiles.add(new SupportingFile("requestinfo.mustache", sourceFolder, "RequestInfo.h"));
-    supportingFiles.add(new SupportingFile("error-header.mustache", sourceFolder, "Error.h"));
-    supportingFiles.add(new SupportingFile("error-body.mustache", sourceFolder, "Error.cpp"));
     supportingFiles.add(new SupportingFile("Doxyfile.mustache", documentationFolder, "Doxyfile"));
-    supportingFiles.add(new SupportingFile("generateDocumentation.mustache", documentationFolder, "generateDocumentation.sh"));
     supportingFiles.add(new SupportingFile("doc-readme.mustache", documentationFolder, "README.md"));
 
      defaultIncludes = new HashSet<String>(
@@ -110,35 +111,36 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
                     "bool",
                     "int32",
                     "int64",
+                    "uint32",
+                    "uint64",
                     "double",
                     "float",
                     "FString",
                     "TArray",
-                    "TMap")
+                    "TMap",
+                    "wtf")
     );
 
     super.typeMapping = new HashMap<String, String>();
 
     //typeMapping.put("Date", "DateTime");
     //typeMapping.put("DateTime", "DateTime");
-    typeMapping.put("string", "FString");
+    
     typeMapping.put("integer", "int32");
-    typeMapping.put("float", "float");
+    typeMapping.put("int32", "int32");
     typeMapping.put("long", "int64");
-    typeMapping.put("boolean", "bool");
+    typeMapping.put("int64", "int64");
+    
+    typeMapping.put("float", "float");
     typeMapping.put("double", "double");
+    
+    typeMapping.put("boolean", "bool");
+    
     typeMapping.put("array", "TArray");
     typeMapping.put("map", "TMap");
-    typeMapping.put("number", "int64");
-    typeMapping.put("object", "FString");
-    typeMapping.put("binary", "FString");
-    typeMapping.put("password", "FString");
-    //TODO:Maybe use better formats for dateTime?
-    typeMapping.put("file", "FString");
-    typeMapping.put("DateTime", "FString");
-    typeMapping.put("Date", "FString");
-    typeMapping.put("UUID", "FString");
-    typeMapping.put("URI", "FString");
+    
+    typeMapping.put("string", "FString");
+    
 
     importMapping = new HashMap<String, String>();
   }
@@ -216,17 +218,6 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
     }
 
     @Override
-    public CodegenModel fromModel(String name, Schema schema) {
-        CodegenModel newModel = super.fromModel(name, schema);
-        if ( newModel.isEnum ) {
-            newModel.classname = "E" + newModel.classname;
-        } else {
-            newModel.classname = "F" + newModel.classname;
-        }
-        return newModel;
-    }
-
-    @Override
     public String getSchemaType(Schema p) {
         String openAPIType = super.getSchemaType(p);
         String type = null;
@@ -254,9 +245,9 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
             Schema openAPISchema = allDefinitions == null ? null : allDefinitions.get(openAPIType);
             if ( openAPISchema != null ) {
                 if ( openAPISchema.getEnum() != null && !openAPISchema.getEnum().isEmpty()) {
-                    return "E" + toModelName(openAPIType);
+                    return toModelName(openAPIType);
                 } else {
-                    return "F" + toModelName(openAPIType);
+                    return toModelName(openAPIType);
                 }
             }
         }
@@ -285,8 +276,17 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
                 languageSpecificPrimitives.contains(type)) {
             return type;
         } else {
-            return getModelNamePrefix() + Character.toUpperCase(type.charAt(0)) + type.substring(1);
+            Map<String, Schema> allDefinitions = ModelUtils.getSchemas(this.openAPI);
+            Schema openAPISchema = allDefinitions == null ? null : allDefinitions.get(type);
+            if ( openAPISchema != null ) {
+                if ( openAPISchema.getEnum() != null && !openAPISchema.getEnum().isEmpty()) {
+                    return  "E" + getModelNamePrefix() + camelize(type);
+                } else {
+                    return  "F" + getModelNamePrefix() + camelize(type);
+                }
+            }
         }
+        return type;
     }
 
     @Override	
@@ -297,7 +297,16 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
 
     @Override
     public String toModelImport(String name) {
-        return "#include \"" + name + ".h\"";
+        name = RemoveNamePrefix(name);
+        return "#include \"" + getModelNamePrefix() + camelize(name) + ".h\"";
+    }
+
+    // had to add this filthy hack in order to get correct import for parent class.
+    // toModelImport() get's incorrect input for base class resulting in duplicating prefix
+    private String RemoveNamePrefix(String name) {
+        String newName = name.replaceAll("E" + getModelNamePrefix(), "");
+        newName = newName.replaceAll("F" + getModelNamePrefix(), "");
+        return newName;
     }
 
     //Might not be needed
