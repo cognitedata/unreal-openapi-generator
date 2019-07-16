@@ -13,6 +13,7 @@
 {{^parent}}#include "Object.h"{{/parent}}
 #include "{{classFilename}}.generated.h"
 
+
 USTRUCT()
 struct COGNITECDF_API {{classname}} : public {{#parent}}{{parent}}{{/parent}}{{^parent}}Object{{/parent}}
 {

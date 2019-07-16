@@ -8,6 +8,22 @@ import java.util.*;
 
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.util.SchemaTypeUtil;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.callbacks.Callback;
+import io.swagger.v3.oas.models.examples.Example;
+import io.swagger.v3.oas.models.headers.Header;
+import io.swagger.v3.oas.models.media.*;
+import io.swagger.v3.oas.models.parameters.*;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.oas.models.security.OAuthFlow;
+import io.swagger.v3.oas.models.security.OAuthFlows;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
+import io.swagger.v3.oas.models.servers.ServerVariable;
+import io.swagger.v3.parser.util.SchemaTypeUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.openapitools.codegen.CodegenConfig;
 import org.openapitools.codegen.CodegenType;
@@ -191,6 +207,16 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
   public String modelFileFolder() {
     return outputFolder + "/" + sourceFolder + "/" + modelPackage().replace('.', File.separatorChar);
   }
+
+    @Override
+    protected void addImport(CodegenModel m, String type) {
+        if (type != null && needToImport(type)) {
+            if ( !type.equals(m.classname+"AllOf") && !type.equals(m.classname+"AnyOf") && !type.equals(m.classname+"OneOf") ) {
+                m.imports.add(type);
+            }
+        }
+    }
+
 
 
     @Override
