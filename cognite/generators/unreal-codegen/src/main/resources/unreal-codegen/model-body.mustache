@@ -6,15 +6,6 @@
 #include "{{classFilename}}.h"
 
 
-void {{classname}}::SerializeToJson(TSharedPtr<FJsonObject>& OutJsonObject) const
-{
-	Super::SerializeToJson(OutJsonObject)
-
-	{{#vars}}
-	SetField(OutJsonObject, TEXT("{{name}}"), {{name}});
-	{{/vars}}
-}
-
 bool {{classname}}::InitFromJson(const TSharedPtr<FJsonObject>& JsonObject)
 {
 	const bool bSuccess = true && Super::InitFromJson(JsonObject)
@@ -41,6 +32,15 @@ bool {{classname}}::InitFromJson(const TSharedPtr<FJsonObject>& JsonObject)
 	{{/required}}{{/vars}}
 
 	return true;
+}
+
+void {{classname}}::SerializeToJson(TSharedPtr<FJsonObject>& OutJsonObject) const
+{
+	Super::SerializeToJson(OutJsonObject)
+
+	{{#vars}}
+	SetField(OutJsonObject, TEXT("{{name}}"), {{name}});
+	{{/vars}}
 }
 
 {{/isEnum}}

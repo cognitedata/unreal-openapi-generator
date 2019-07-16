@@ -39,8 +39,8 @@ struct COGNITECDF_API {{classname}} : public {{#parent}}{{parent}}{{/parent}}{{^
 	//
 	// Serialization functions
 	//
-	void SerializeToJson(TSharedPtr<class FJsonObject>& OutJsonObject) const;
 	bool InitFromJson(const TSharedPtr<class FJsonObject>& JsonObject);
+	void SerializeToJson(TSharedPtr<class FJsonObject>& OutJsonObject) const;
 };
 {{/isEnum}}
 {{#isEnum}}
