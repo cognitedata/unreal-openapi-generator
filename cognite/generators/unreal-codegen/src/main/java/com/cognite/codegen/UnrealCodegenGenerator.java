@@ -109,7 +109,6 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
     supportingFiles.add(new SupportingFile("helpers-body.mustache", sourceFolder, "Helpers.cpp"));
     supportingFiles.add(new SupportingFile("netclient-header.mustache", sourceFolder, "NetClient.h"));
     supportingFiles.add(new SupportingFile("netclient-body.mustache", sourceFolder, "NetClient.cpp"));
-    supportingFiles.add(new SupportingFile("object.mustache", sourceFolder, "Object.h"));
     supportingFiles.add(new SupportingFile("requestinfo.mustache", sourceFolder, "RequestInfo.h"));
     supportingFiles.add(new SupportingFile("Doxyfile.mustache", documentationFolder, "Doxyfile"));
     supportingFiles.add(new SupportingFile("doc-readme.mustache", documentationFolder, "README.md"));
@@ -343,7 +342,7 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
     @Override
     public String toModelImport(String name) {
         name = RemoveNamePrefix(name);
-        return "#include \"" + getModelNamePrefix() + camelize(name) + ".h\"";
+        return getModelNamePrefix() + camelize(name);
     }
 
     // had to add this filthy hack in order to get correct import for parent class.

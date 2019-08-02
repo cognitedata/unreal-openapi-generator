@@ -1,28 +1,26 @@
-{{#models}}
-{{#model}}
 #pragma once
 
-{{/model}}
-{{/models}}
+#include "CDP_JsonSerializable.h"
+
 {{#imports}}
-{{{import}}}
+#include "{{{import}}}.h"
 {{/imports}}
+
 {{#models}}
 {{#model}}
 {{^isEnum}}
-{{^parent}}#include "Object.h"{{/parent}}
 #include "{{classFilename}}.generated.h"
 
 
 USTRUCT()
-struct COGNITECDF_API {{classname}} : public {{#parent}}{{parent}}{{/parent}}{{^parent}}Object{{/parent}}
+struct COGNITECDF_API {{classname}} : public {{#parent}}{{parent}}{{/parent}}{{^parent}}FCDP_JsonSerializable{{/parent}}
 {
 	GENERATED_BODY()
 
 	{{#discriminator}}
 	static TSharedPtr<{{classname}}> ConstructFromJson(const TSharedPtr<FJsonObject>& JsonObject);
 	{{/discriminator}}
-	
+
 	//
 	// Required parameters
 	//
