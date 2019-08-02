@@ -163,9 +163,20 @@ components:
           type: integer
           format: int64
 
+          
+     menuHierarchyType:
+      type: string
+      enum:
+        - fullAssetHierarchy
+        - customHierarchy
 
      baseMenuHierarchy:
       type: object
+      discriminator:
+        propertyName: type
+        mapping:
+          fullAssetHierarchy: '#/components/schemas/fullAssetHierarchy'
+          customHierarchy: '#/components/schemas/customMenuHierarchy'
       required:
         - type
       properties:
@@ -206,21 +217,7 @@ components:
           items:
             $ref: '#/components/schemas/customMenuHierarchyNode'
 
-     menuHierarchyType:
-      type: string
-      enum:
-        - fullAssetHierarchy
-        - customHierarchy
 
-     menuHierarchy:
-      oneOf:
-        - $ref: '#/components/schemas/fullAssetHierarchy'
-        - $ref: '#/components/schemas/customMenuHierarchy'
-      discriminator:
-        propertyName: type
-        mapping:
-          fullAssetHierarchy: '#/components/schemas/fullAssetHierarchy'
-          customHierarchy: '#/components/schemas/customMenuHierarchy'
 
      scene:
       type: object
@@ -380,14 +377,19 @@ components:
           text: '#/components/schemas/widgetText'
 
 
+     transformSensorType:
+      type: string
+      enum:
+        - latLongSeparate
+        
      transfromSensorBase:
-      type: object
-      required:
-        - type
       discriminator:
         propertyName: type
         mapping:
           latLongSeparate: '#/components/schemas/latLongSeparateSensor'
+      type: object
+      required:
+        - type
       properties:
         type:
           $ref: '#/components/schemas/transformSensorType'
@@ -420,15 +422,13 @@ components:
             simulateRotationFromPosition:
               type: boolean
 
-     transformSensorType:
-      type: string
-      enum:
-        - latLongSeparate
+     
    
 
      actorBase:
+      discriminator:
+        propertyName: dummyDiscriminator
       type: object
-      discriminator: dummyDiscriminator
       required:
         - name
         - transform
@@ -588,29 +588,29 @@ components:
         
 
      unrealTransform:
-      anyOf:
+      allOf:
         - $ref: '#/components/schemas/baseTransform'
-      type: object
-      required:
-        - position
-        - rotation
-        - scale
-      properties:
-        position:
-          type: array
-          items:
-            type: number
-            format: float
-        rotation:
-          type: array
-          items:
-            type: number
-            format: float
-        scale:
-          type: array
-          items:
-            type: number
-            format: float
+        - type: object
+          required:
+            - position
+            - rotation
+            - scale
+          properties:
+            position:
+              type: array
+              items:
+                type: number
+                format: float
+            rotation:
+              type: array
+              items:
+                type: number
+                format: float
+            scale:
+              type: array
+              items:
+                type: number
+                format: float
 
      latlongTransform:
       allOf:

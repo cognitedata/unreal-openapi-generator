@@ -12,10 +12,10 @@ bool {{classname}}::InitFromJson(const TSharedPtr<FJsonObject>& JsonObject)
 	{{#vars}}{{#required}}
 		{{^isEnum}}
 		&& TryGetField(JsonObject, TEXT("{{name}}"), {{name}})
-			{{/isEnum}}
-			{{#isEnum}}
+		{{/isEnum}}
+		{{#isEnum}}
 		&& TRY_GET_JSON_ENUM_FIELD({{dataType}}, JsonObject, TEXT("{{name}}"), {{name}})
-			{{/isEnum}}
+		{{/isEnum}}
 	{{/required}}{{/vars}}
 		;
 	

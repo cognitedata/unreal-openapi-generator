@@ -315,10 +315,26 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
         return type;
     }
 
+    
+
+    // TODO:
+    // SUPER DIRTY HACK! Find a way to avoid this
     @Override	
-    public Map<String, Object> postProcessModels(Map<String, Object> objs) {	
-        super.postProcessModels(objs);	
-        return postProcessModelsEnum(objs);	
+    public void postProcessFile(File file, String fileType) {
+        //super.postProcessFile(file, fileType);
+        if ( file.getName().endsWith("AllOf.h") || 
+             file.getName().endsWith("AllOf.cpp") ||
+             file.getName().endsWith("AnyOf.h") || 
+             file.getName().endsWith("AnyOf.cpp") ||
+             file.getName().endsWith("OneOf.h") || 
+             file.getName().endsWith("OneOf.cpp") ) {
+            
+                file.delete();
+             }
+    }
+    @Override	
+    public boolean isEnablePostProcessFile() {
+        return true;
     }
 
     @Override
