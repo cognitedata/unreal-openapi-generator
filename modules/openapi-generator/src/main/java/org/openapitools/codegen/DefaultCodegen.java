@@ -1871,6 +1871,7 @@ public class DefaultCodegen implements CodegenConfig {
                 String name = nameOrRef.indexOf('/') >= 0 ? ModelUtils.getSimpleRef(nameOrRef) : nameOrRef;
                 String modelName = toModelName(name);
                 discriminator.getMappedModels().add(new MappedModel(e.getKey(), modelName));
+                discriminator.getImports().add(getModelNamePrefix() + camelize(modelName));
             }
         } else {
             Map<String, Schema> allDefinitions = ModelUtils.getSchemas(this.openAPI);
@@ -1882,6 +1883,7 @@ public class DefaultCodegen implements CodegenConfig {
                             .collect(Collectors.toSet());
                     if (parentSchemas.contains(schemaName)) {
                         discriminator.getMappedModels().add(new MappedModel(childName, toModelName(childName)));
+                        discriminator.getImports().add(getModelNamePrefix() + camelize(childName));
                     }
                 }
             });

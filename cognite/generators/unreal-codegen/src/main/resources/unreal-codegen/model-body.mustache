@@ -5,6 +5,31 @@
 
 #include "{{classFilename}}.h"
 
+{{#discriminator}}
+{{#imports}}
+#include "{{.}}.h"
+{{/imports}}
+{{/discriminator}}
+
+{{#discriminator}}
+TSharedPtr<{{classname}}> {{classname}}::ConstructFromJson(const TSharedPtr<FJsonObject>& JsonObject)
+{
+	if ( TryGetField(JsonObject, TEXT("{{propertyName}}"), {{propertyName}}) )
+	{
+		{{#mappedModels}}
+		if ( {{propertyName}} == "{{mappingName}}" )
+		{
+			TSharedPtr<{{modelName}}> RetVal = MakeShareable(new {{modelName}}());
+			if ( RetVal->InitFromJson(JsonObject) )
+			{
+				return RetVal;
+			}
+		}
+		{{/mappedModels}}
+	}
+	return nullptr;
+}
+{{/discriminator}}
 
 bool {{classname}}::InitFromJson(const TSharedPtr<FJsonObject>& JsonObject)
 {
@@ -43,6 +68,9 @@ void {{classname}}::SerializeToJson(TSharedPtr<FJsonObject>& OutJsonObject) cons
 	{{/vars}}
 }
 
+
+
 {{/isEnum}}
 {{/model}}
 {{/models}}
+

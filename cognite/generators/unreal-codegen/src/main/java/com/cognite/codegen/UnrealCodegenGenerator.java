@@ -315,7 +315,7 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
         return type;
     }
 
-    
+
 
     // TODO:
     // SUPER DIRTY HACK! Find a way to avoid this
@@ -330,12 +330,15 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
              file.getName().endsWith("OneOf.cpp") ) {
             
                 file.delete();
-             }
+        }
     }
     @Override	
     public boolean isEnablePostProcessFile() {
         return true;
     }
+
+
+    
 
     @Override
     public String toModelImport(String name) {

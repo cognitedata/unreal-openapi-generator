@@ -18,6 +18,11 @@ USTRUCT()
 struct COGNITECDF_API {{classname}} : public {{#parent}}{{parent}}{{/parent}}{{^parent}}Object{{/parent}}
 {
 	GENERATED_BODY()
+
+	{{#discriminator}}
+	static TSharedPtr<{{classname}}> ConstructFromJson(const TSharedPtr<FJsonObject>& JsonObject);
+	{{/discriminator}}
+	
 	//
 	// Required parameters
 	//

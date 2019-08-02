@@ -58,7 +58,7 @@ components:
           items:
             $ref: '#/components/schemas/scene'
         hierarchy:
-          $ref: '#/components/schemas/menuHierarchy'
+          $ref: '#/components/schemas/baseMenuHierarchy'
 
      header:
       required:
@@ -164,11 +164,7 @@ components:
           format: int64
 
           
-     menuHierarchyType:
-      type: string
-      enum:
-        - fullAssetHierarchy
-        - customHierarchy
+    
 
      baseMenuHierarchy:
       type: object
@@ -181,7 +177,7 @@ components:
         - type
       properties:
         type:
-          $ref: '#/components/schemas/menuHierarchyType'
+          type: string
 
      fullAssetHierarchy:
       allOf:
@@ -315,7 +311,7 @@ components:
         - content
       properties:
         type:
-          $ref: '#/components/schemas/widgetType'
+          type: string
         content:
           type: string
         assetId:
@@ -363,10 +359,6 @@ components:
             backgroundColor:
               $ref: '#/components/schemas/color'
 
-     widgetType:
-      type: string
-      enum:
-        - text
 
      widget:
       oneOf:
@@ -377,11 +369,7 @@ components:
           text: '#/components/schemas/widgetText'
 
 
-     transformSensorType:
-      type: string
-      enum:
-        - latLongSeparate
-        
+           
      transfromSensorBase:
       discriminator:
         propertyName: type
@@ -392,7 +380,7 @@ components:
         - type
       properties:
         type:
-          $ref: '#/components/schemas/transformSensorType'
+          type: string
 
      heightTrackingMode:
       type: string
@@ -427,12 +415,14 @@ components:
 
      actorBase:
       discriminator:
-        propertyName: dummyDiscriminator
+        propertyName: actorType
       type: object
       required:
         - name
         - transform
       properties:
+        actorType:
+          type: string
         name:
           type: string
         transform:
@@ -567,11 +557,6 @@ components:
           items:
             type: string
 
-     absoluteTransformType:
-      type: string
-      enum:
-        - unrealTransform
-        - latlongTransform
 
      baseTransform:
       type: object
@@ -584,7 +569,7 @@ components:
           latlongTransform: '#/components/schemas/latlongTransform'
       properties:
         type:
-          $ref: '#/components/schemas/absoluteTransformType'
+          type: string
         
 
      unrealTransform:

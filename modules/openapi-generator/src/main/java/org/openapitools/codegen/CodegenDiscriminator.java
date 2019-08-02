@@ -6,11 +6,23 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 
 public class CodegenDiscriminator {
     private String propertyName;
     private Map<String, String> mapping;
     private Set<MappedModel> mappedModels = new LinkedHashSet<>();
+    private List<String> imports = new ArrayList<String>();
+
+
+    public List<String> getImports() {
+        return imports;
+    }
+
+    public void setImports(List<String> imports) {
+        this.imports = imports;
+    }
 
     public String getPropertyName() {
         return propertyName;
@@ -88,7 +100,7 @@ public class CodegenDiscriminator {
 
     @Override
     public int hashCode() {
-        return Objects.hash(propertyName, mapping, mappedModels);
+        return Objects.hash(propertyName, mapping, mappedModels, imports);
     }
 
     @Override
@@ -97,6 +109,7 @@ public class CodegenDiscriminator {
                 .append("propertyName", propertyName)
                 .append("mapping", mapping)
                 .append("mappedModels", mappedModels)
+                .append("imports", imports)
                 .toString();
     }
 }
