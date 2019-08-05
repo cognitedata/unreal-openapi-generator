@@ -314,7 +314,11 @@ public class UnrealCodegenGenerator extends AbstractCppCodegen implements Codege
         return type;
     }
 
-
+    @Override
+    public Map<String, Object> postProcessModels(Map<String, Object> objs) {
+        super.postProcessModels(objs);
+        return postProcessModelsEnum(objs);		
+    }
 
     // TODO:
     // SUPER DIRTY HACK! Find a way to avoid this

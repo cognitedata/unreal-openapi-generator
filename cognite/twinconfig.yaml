@@ -164,8 +164,12 @@ components:
           format: int64
 
           
-    
-
+     menuHierarchyType:
+       type: string
+       enum:
+         - fullAssetHierarchy
+         - customHierarchy
+         
      baseMenuHierarchy:
       type: object
       discriminator:
@@ -177,7 +181,7 @@ components:
         - type
       properties:
         type:
-          type: string
+          $ref: '#/components/schemas/menuHierarchyType'
 
      fullAssetHierarchy:
       allOf:
@@ -304,14 +308,23 @@ components:
         - faceCamera
         - faceCamera_ZOnly
         - faceCamera_HorizontalAlignment
+        
+     widgetType:
+       type: string
+       enum:
+         - text
 
      widgetBase:
+      discriminator:
+        propertyName: type
+        mapping:
+          text: '#/components/schemas/widgetText'
       required:
         - type
         - content
       properties:
         type:
-          type: string
+          $ref: '#/components/schemas/widgetType'
         content:
           type: string
         assetId:
@@ -360,15 +373,10 @@ components:
               $ref: '#/components/schemas/color'
 
 
-     widget:
-      oneOf:
-        - $ref: '#/components/schemas/widgetText'
-      discriminator:
-        propertyName: type
-        mapping:
-          text: '#/components/schemas/widgetText'
-
-
+     transformSensorType:
+       type: string
+       enum:
+         - latLongSeparate
            
      transfromSensorBase:
       discriminator:
@@ -380,7 +388,7 @@ components:
         - type
       properties:
         type:
-          type: string
+          $ref: '#/components/schemas/transformSensorType'
 
      heightTrackingMode:
       type: string
@@ -430,7 +438,7 @@ components:
         widgets:
           type: array
           items:
-            $ref: '#/components/schemas/widget'
+            $ref: '#/components/schemas/widgetBase'
         positionSensors:
           type: array
           items:
@@ -558,6 +566,12 @@ components:
             type: string
 
 
+     absoluteTransformType:
+       type: string
+       enum:
+         - unrealTransform
+         - latlongTransform
+
      baseTransform:
       type: object
       required:
@@ -569,7 +583,7 @@ components:
           latlongTransform: '#/components/schemas/latlongTransform'
       properties:
         type:
-          type: string
+          $ref: '#/components/schemas/absoluteTransformType'
         
 
      unrealTransform:
