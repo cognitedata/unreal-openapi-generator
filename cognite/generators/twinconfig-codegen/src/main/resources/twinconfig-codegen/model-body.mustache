@@ -1,0 +1,104 @@
+{{#models}}{{#model}}
+{{^isEnum}}
+#include "{{classFilename}}.h"
+
+#include "Json.h"
+#include "JsonUtilities.h"
+
+{{#discriminator}}
+{{#imports}}
+#include "{{.}}.h"
+{{/imports}}
+{{/discriminator}}
+
+TSharedPtr<{{classname}}> {{classname}}::ConstructFromJson(const TSharedPtr<FJsonObject>& JsonObject)
+{
+	TSharedPtr<{{classname}}> RetVal;
+{{#discriminator}}
+	FString {{propertyName}};
+	if ( TryGetField(JsonObject, TEXT("{{propertyName}}"), {{propertyName}}) )
+	{
+		{{#mappedModels}}
+		if ( {{propertyName}} == "{{mappingName}}" )
+		{
+			RetVal = MakeShareable(new {{modelName}}());
+			if ( RetVal->InitFromJson(JsonObject) )
+			{
+				return RetVal;
+			}
+		}
+		{{/mappedModels}}
+	}
+{{/discriminator}}
+{{^discriminator}}
+	RetVal = MakeShareable(new {{classname}}());
+	if ( RetVal->InitFromJson(JsonObject) )
+	{
+		return RetVal;
+	}
+{{/discriminator}}
+	return nullptr;
+}
+
+bool {{classname}}::InitFromJson(const TSharedPtr<FJsonObject>& JsonObject)
+{
+	const bool bSuccess = true
+	{{#parent}}&& {{parent}}::InitFromJson(JsonObject){{/parent}}
+	{{#vars}}{{#required}}
+		{{^isEnum}}
+		&& TryGetField(JsonObject, TEXT("{{name}}"), {{name}})
+		{{/isEnum}}
+		{{#isEnum}}
+		&& TRY_GET_JSON_ENUM_FIELD({{dataType}}, JsonObject, TEXT("{{name}}"), {{name}})
+		{{/isEnum}}
+	{{/required}}{{/vars}}
+		;
+	
+	if (!bSuccess)
+		return false;
+
+	{{#vars}}{{^required}}
+		{{^isEnum}}
+	TryGetOptionalField(JsonObject, TEXT("{{name}}"), {{name}});
+		{{/isEnum}}
+		{{#isEnum}}
+	TRY_GET_OPTIONAL_JSON_ENUM_FIELD({{dataType}}, JsonObject, TEXT("{{name}}"), {{name}});
+		{{/isEnum}}
+	{{/required}}{{/vars}}
+
+	return true;
+}
+
+TSharedRef<FJsonValue> {{classname}}::SerializeToJson() const
+{
+	TSharedRef<FJsonObject> JsonObject;
+	{{^parent}}JsonObject = MakeJsonObject();{{/parent}}
+	{{#parent}}JsonObject = {{parent}}::SerializeToJson()->AsObject().ToSharedRef();{{/parent}}
+	
+	{{#vars}}{{#required}}
+		{{^isEnum}}
+	SetField(JsonObject, TEXT("{{name}}"), {{name}});
+		{{/isEnum}}
+		{{#isEnum}}
+	SET_JSON_ENUM_FIELD({{dataType}}, JsonObject, TEXT("{{name}}"), {{name}});
+		{{/isEnum}}
+	{{/required}}{{/vars}}
+
+	{{#vars}}{{^required}}
+		{{^isEnum}}
+	SetField(JsonObject, TEXT("{{name}}"), {{name}});
+		{{/isEnum}}
+		{{#isEnum}}
+	SET_OPTIONAL_JSON_ENUM_FIELD({{dataType}}, JsonObject, TEXT("{{name}}"), {{name}});
+		{{/isEnum}}
+	{{/required}}{{/vars}}
+	
+	return ToValueObject(JsonObject);
+}
+
+
+
+{{/isEnum}}
+{{/model}}
+{{/models}}
+

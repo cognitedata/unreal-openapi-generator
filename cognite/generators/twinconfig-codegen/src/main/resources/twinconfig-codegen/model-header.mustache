@@ -1,0 +1,60 @@
+#pragma once
+
+#include "CDP_API_HelperTypes.h"
+
+{{#imports}}
+#include "{{{import}}}.h"
+{{/imports}}
+
+{{#models}}
+{{#model}}
+{{^isEnum}}
+#include "{{classFilename}}.generated.h"
+
+
+USTRUCT()
+struct COGNITETWINCONFIG_API {{classname}} : public {{#parent}}{{parent}}{{/parent}}{{^parent}}FCDP_JsonSerializable{{/parent}}
+{
+	GENERATED_BODY()
+
+	static TSharedPtr<{{classname}}> ConstructFromJson(const TSharedPtr<FJsonObject>& JsonObject);
+
+	//
+	// Required parameters
+	//
+	{{#vars}}
+	{{#required}}
+	{{#isContainer}}{{dataType}}{{#isMapContainer}}< FString, {{#items}}{{#isModel}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}{{^isEnum}}>{{/isEnum}}{{/isModel}}{{/items}}>{{/isMapContainer}}{{^isMapContainer}}<{{#items}}{{#isModel}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}{{^isEnum}}>{{/isEnum}}{{/isModel}}{{/items}}>{{/isMapContainer}}{{/isContainer}}{{^isContainer}}{{#isModel}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}{{^isEnum}}>{{/isEnum}}{{/isModel}}{{/isContainer}} {{name}};
+	{{/required}}
+	{{/vars}}
+	
+	//
+	// Optional parameters
+	//
+	{{#vars}}
+	{{^required}}
+	TOptional<{{#isContainer}}{{dataType}}{{#isMapContainer}}< FString, {{#items}}{{#isModel}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}{{^isEnum}}>{{/isEnum}}{{/isModel}}{{/items}}>{{/isMapContainer}}{{^isMapContainer}}<{{#items}}{{#isModel}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}{{^isEnum}}>{{/isEnum}}{{/isModel}}{{/items}}>{{/isMapContainer}}{{/isContainer}}{{^isContainer}}{{#isModel}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}{{^isEnum}}>{{/isEnum}}{{/isModel}}{{/isContainer}}> {{name}};
+	{{/required}}
+	{{/vars}}
+
+	//
+	// Serialization functions
+	//
+	bool InitFromJson(const TSharedPtr<class FJsonObject>& JsonObject);
+	TSharedRef<FJsonValue> SerializeToJson() const;
+};
+{{/isEnum}}
+{{#isEnum}}
+UENUM(BlueprintType)
+enum class {{classname}} : uint8
+{
+  	{{#allowableValues}}
+	{{#enumVars}}
+	{{name}}{{^-last}},{{/-last}}
+	{{/enumVars}}
+	{{/allowableValues}}
+};
+{{/isEnum}}
+{{/model}}
+{{/models}}
+

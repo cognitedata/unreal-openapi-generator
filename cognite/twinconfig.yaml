@@ -170,6 +170,39 @@ components:
          - fullAssetHierarchy
          - customHierarchy
          
+     location:
+        type: object
+        required:
+          - crs
+          - coordinates
+        properties:
+          crs:
+            type: string
+          coordinates:
+            type: array
+            items:
+              type: number
+              format: double
+     
+     coordinates:
+       type: object
+       required:
+         - location
+         - rotationYaw
+         - localOrign
+       properties:
+         location:
+           $ref: '#/components/schemas/location'
+         rotationYaw:
+           type: number
+           format: float
+         localOrign:
+           type: array
+           items:
+             type: number
+             format: float
+         
+         
      baseMenuHierarchy:
       type: object
       discriminator:
@@ -225,13 +258,13 @@ components:
         - coordinates
       properties:
         coordinates:
-          type: object
+          $ref: '#/components/schemas/coordinates'
         cameraCoordinates:
-          type: object
+          $ref: '#/components/schemas/absoluteTransform'
         twinActors:
           type: array
           items:
-            type: object
+            $ref: '#/components/schemas/twinActor'
         terrains:
           type: array
           items:
@@ -257,7 +290,7 @@ components:
         viewModes:
           type: array
           items:
-            type: object
+            $ref: '#/components/schemas/viewMode'
 
      terrain:
       type: object
@@ -265,7 +298,7 @@ components:
         - transform
       properties:
         transform:
-          $ref: '#/components/schemas/baseTransform'
+          $ref: '#/components/schemas/absoluteTransform'
         heightMap:
           type: string
         normalMapMap:
@@ -434,7 +467,7 @@ components:
         name:
           type: string
         transform:
-          $ref: '#/components/schemas/baseTransform'
+          $ref: '#/components/schemas/absoluteTransform'
         widgets:
           type: array
           items:
@@ -540,7 +573,7 @@ components:
           type: number
           format: float
         transform:
-          $ref: '#/components/schemas/baseTransform'
+          $ref: '#/components/schemas/absoluteTransform'
 
      environmentControl:
       type: object
@@ -570,9 +603,9 @@ components:
        type: string
        enum:
          - unrealTransform
-         - latlongTransform
+         - universalTransform
 
-     baseTransform:
+     absoluteTransform:
       type: object
       required:
         - type
@@ -580,7 +613,7 @@ components:
         propertyName: type
         mapping:
           unrealTransform: '#/components/schemas/unrealTransform'
-          latlongTransform: '#/components/schemas/latlongTransform'
+          universalTransform: '#/components/schemas/universalTransform'
       properties:
         type:
           $ref: '#/components/schemas/absoluteTransformType'
@@ -588,7 +621,7 @@ components:
 
      unrealTransform:
       allOf:
-        - $ref: '#/components/schemas/baseTransform'
+        - $ref: '#/components/schemas/absoluteTransform'
         - type: object
           required:
             - position
@@ -611,22 +644,17 @@ components:
                 type: number
                 format: float
 
-     latlongTransform:
+     universalTransform:
       allOf:
-        - $ref: '#/components/schemas/baseTransform'
+        - $ref: '#/components/schemas/absoluteTransform'
         - type: object
           required:
-            - latitude
-            - longitude
+            - location
             - rotation
             - scale
           properties:
-            latitude:
-              type: number
-              format: float
-            longitude:
-              type: number
-              format: float
+            location:
+              $ref: '#/components/schemas/location'
             rotation:
               type: array
               items:
