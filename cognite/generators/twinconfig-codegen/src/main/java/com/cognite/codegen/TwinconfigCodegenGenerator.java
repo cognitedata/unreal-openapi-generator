@@ -57,7 +57,7 @@ public class TwinconfigCodegenGenerator extends AbstractCppCodegen implements Co
     /**
      * Model Package.  Optional, if needed, this can be used in templates
      */
-    modelPackage = "org.openapitools.model";
+    modelPackage = "model";
     /**
      * Api Package.  Optional, if needed, this can be used in templates
      */
@@ -105,13 +105,7 @@ public class TwinconfigCodegenGenerator extends AbstractCppCodegen implements Co
      * it will be processed by the template engine.  Otherwise, it will be copied
      */
     supportingFiles.clear();
-    supportingFiles.add(new SupportingFile("helpers-header.mustache", sourceFolder, "Helpers.h"));
-    supportingFiles.add(new SupportingFile("helpers-body.mustache", sourceFolder, "Helpers.cpp"));
-    supportingFiles.add(new SupportingFile("netclient-header.mustache", sourceFolder, "NetClient.h"));
-    supportingFiles.add(new SupportingFile("netclient-body.mustache", sourceFolder, "NetClient.cpp"));
-    supportingFiles.add(new SupportingFile("requestinfo.mustache", sourceFolder, "RequestInfo.h"));
-    supportingFiles.add(new SupportingFile("Doxyfile.mustache", documentationFolder, "Doxyfile"));
-    supportingFiles.add(new SupportingFile("doc-readme.mustache", documentationFolder, "README.md"));
+    
 
      defaultIncludes = new HashSet<String>(
             Arrays.asList(
