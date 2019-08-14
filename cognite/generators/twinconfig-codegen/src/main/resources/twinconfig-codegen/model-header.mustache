@@ -40,8 +40,8 @@ struct COGNITETWINCONFIG_API {{classname}} : public {{#parent}}{{parent}}{{/pare
 	//
 	// Serialization functions
 	//
-	bool InitFromJson(const TSharedPtr<class FJsonObject>& JsonObject);
-	TSharedRef<FJsonValue> SerializeToJson() const;
+	virtual bool InitFromJson(const TSharedPtr<class FJsonObject>& JsonObject) override;
+	virtual TSharedRef<FJsonValue> SerializeToJson() const override;
 };
 {{/isEnum}}
 {{#isEnum}}

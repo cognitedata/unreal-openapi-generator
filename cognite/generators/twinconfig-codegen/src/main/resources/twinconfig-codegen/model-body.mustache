@@ -13,7 +13,6 @@
 
 TSharedPtr<{{classname}}> {{classname}}::ConstructFromJson(const TSharedPtr<FJsonObject>& JsonObject)
 {
-	TSharedPtr<{{classname}}> RetVal;
 {{#discriminator}}
 	FString {{propertyName}};
 	if ( TryGetField(JsonObject, TEXT("{{propertyName}}"), {{propertyName}}) )
@@ -21,7 +20,7 @@ TSharedPtr<{{classname}}> {{classname}}::ConstructFromJson(const TSharedPtr<FJso
 		{{#mappedModels}}
 		if ( {{propertyName}} == "{{mappingName}}" )
 		{
-			RetVal = MakeShareable(new {{modelName}}());
+			TSharedPtr<{{modelName}}> RetVal = MakeShareable(new {{modelName}}());
 			if ( RetVal->InitFromJson(JsonObject) )
 			{
 				return RetVal;
@@ -31,7 +30,7 @@ TSharedPtr<{{classname}}> {{classname}}::ConstructFromJson(const TSharedPtr<FJso
 	}
 {{/discriminator}}
 {{^discriminator}}
-	RetVal = MakeShareable(new {{classname}}());
+	TSharedPtr<{{classname}}> RetVal = MakeShareable(new {{classname}}());
 	if ( RetVal->InitFromJson(JsonObject) )
 	{
 		return RetVal;
@@ -71,9 +70,8 @@ bool {{classname}}::InitFromJson(const TSharedPtr<FJsonObject>& JsonObject)
 
 TSharedRef<FJsonValue> {{classname}}::SerializeToJson() const
 {
-	TSharedRef<FJsonObject> JsonObject;
-	{{^parent}}JsonObject = MakeJsonObject();{{/parent}}
-	{{#parent}}JsonObject = {{parent}}::SerializeToJson()->AsObject().ToSharedRef();{{/parent}}
+	{{^parent}}TSharedRef<FJsonObject> JsonObject = MakeJsonObject();{{/parent}}
+	{{#parent}}TSharedRef<FJsonObject> JsonObject = {{parent}}::SerializeToJson()->AsObject().ToSharedRef();{{/parent}}
 	
 	{{#vars}}{{#required}}
 		{{^isEnum}}
