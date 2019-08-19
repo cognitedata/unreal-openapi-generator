@@ -11,7 +11,6 @@
 {{^isEnum}}
 #include "{{classFilename}}.generated.h"
 
-
 USTRUCT()
 struct COGNITETWINCONFIG_API {{classname}} : public {{#parent}}{{parent}}{{/parent}}{{^parent}}FCDP_JsonSerializable{{/parent}}
 {
@@ -40,8 +39,8 @@ struct COGNITETWINCONFIG_API {{classname}} : public {{#parent}}{{parent}}{{/pare
 	//
 	// Serialization functions
 	//
-	virtual bool InitFromJson(const TSharedPtr<class FJsonObject>& JsonObject) override;
-	virtual TSharedRef<FJsonValue> SerializeToJson() const override;
+	bool InitFromJson(const TSharedPtr<class FJsonObject>& JsonObject);
+	TSharedRef<FJsonValue> SerializeToJson() const;
 };
 {{/isEnum}}
 {{#isEnum}}

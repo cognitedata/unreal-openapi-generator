@@ -41,55 +41,28 @@ TSharedPtr<{{classname}}> {{classname}}::ConstructFromJson(const TSharedPtr<FJso
 
 bool {{classname}}::InitFromJson(const TSharedPtr<FJsonObject>& JsonObject)
 {
-	const bool bSuccess = true
-	{{#parent}}&& {{parent}}::InitFromJson(JsonObject){{/parent}}
-	{{#vars}}{{#required}}
-		{{^isEnum}}
-		&& TryGetField(JsonObject, TEXT("{{name}}"), {{name}})
-		{{/isEnum}}
-		{{#isEnum}}
-		&& TRY_GET_JSON_ENUM_FIELD({{dataType}}, JsonObject, TEXT("{{name}}"), {{name}})
-		{{/isEnum}}
-	{{/required}}{{/vars}}
-		;
-	
+	const bool bSuccess = {{^parent}}true{{/parent}}{{#parent}}{{parent}}::InitFromJson(JsonObject){{/parent}}{{#vars}}{{#required}}{{^isEnum}}
+			&& TryGetField(JsonObject, TEXT("{{name}}"), {{name}}){{/isEnum}}{{#isEnum}}
+			&& TRY_GET_JSON_ENUM_FIELD({{dataType}}, JsonObject, TEXT("{{name}}"), {{name}}){{/isEnum}}{{/required}}{{/vars}}
+			;
 	if (!bSuccess)
 		return false;
-
-	{{#vars}}{{^required}}
-		{{^isEnum}}
-	TryGetOptionalField(JsonObject, TEXT("{{name}}"), {{name}});
-		{{/isEnum}}
-		{{#isEnum}}
-	TRY_GET_OPTIONAL_JSON_ENUM_FIELD({{dataType}}, JsonObject, TEXT("{{name}}"), {{name}});
-		{{/isEnum}}
-	{{/required}}{{/vars}}
+	{{#vars}}{{^required}}{{^isEnum}}
+	TryGetOptionalField(JsonObject, TEXT("{{name}}"), {{name}});{{/isEnum}}{{#isEnum}}
+	TRY_GET_OPTIONAL_JSON_ENUM_FIELD({{dataType}}, JsonObject, TEXT("{{name}}"), {{name}});{{/isEnum}}{{/required}}{{/vars}}
 
 	return true;
 }
 
 TSharedRef<FJsonValue> {{classname}}::SerializeToJson() const
 {
-	{{^parent}}TSharedRef<FJsonObject> JsonObject = MakeJsonObject();{{/parent}}
-	{{#parent}}TSharedRef<FJsonObject> JsonObject = {{parent}}::SerializeToJson()->AsObject().ToSharedRef();{{/parent}}
-	
-	{{#vars}}{{#required}}
-		{{^isEnum}}
-	SetField(JsonObject, TEXT("{{name}}"), {{name}});
-		{{/isEnum}}
-		{{#isEnum}}
-	SET_JSON_ENUM_FIELD({{dataType}}, JsonObject, TEXT("{{name}}"), {{name}});
-		{{/isEnum}}
-	{{/required}}{{/vars}}
-
-	{{#vars}}{{^required}}
-		{{^isEnum}}
-	SetField(JsonObject, TEXT("{{name}}"), {{name}});
-		{{/isEnum}}
-		{{#isEnum}}
-	SET_OPTIONAL_JSON_ENUM_FIELD({{dataType}}, JsonObject, TEXT("{{name}}"), {{name}});
-		{{/isEnum}}
-	{{/required}}{{/vars}}
+	{{^parent}}TSharedRef<FJsonObject> JsonObject = MakeJsonObject();{{/parent}}{{#parent}}TSharedRef<FJsonObject> JsonObject = {{parent}}::SerializeToJson()->AsObject().ToSharedRef();{{/parent}}
+	{{#vars}}{{#required}}{{^isEnum}}
+	SetField(JsonObject, TEXT("{{name}}"), {{name}});{{/isEnum}}{{#isEnum}}
+	SET_JSON_ENUM_FIELD({{dataType}}, JsonObject, TEXT("{{name}}"), {{name}});{{/isEnum}}{{/required}}{{/vars}}
+	{{#vars}}{{^required}}{{^isEnum}}
+	SetField(JsonObject, TEXT("{{name}}"), {{name}});{{/isEnum}}{{#isEnum}}
+	SET_OPTIONAL_JSON_ENUM_FIELD({{dataType}}, JsonObject, TEXT("{{name}}"), {{name}});{{/isEnum}}{{/required}}{{/vars}}
 	
 	return ToValueObject(JsonObject);
 }

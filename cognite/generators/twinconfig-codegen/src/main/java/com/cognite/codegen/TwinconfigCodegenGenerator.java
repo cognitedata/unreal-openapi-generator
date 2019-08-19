@@ -44,7 +44,7 @@ public class TwinconfigCodegenGenerator extends AbstractCppCodegen implements Co
   protected String sourceFolder = "src";
   protected String documentationFolder = "doc";
   protected String apiVersion = "1.0.0";
-  protected String fileNamePrefix = "CDF_API_";
+  protected String fileNamePrefix = "TC_API_";
 
   public TwinconfigCodegenGenerator() {
     super();
