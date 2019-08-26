@@ -1,48 +1,37 @@
+
 openapi: 3.0.0
 servers:
   - description: SwaggerHub API Auto Mocking
     url: 'https://virtserver.swaggerhub.com/glebcognite/TwinConfiguration/1.0.0'
 info:
-  description: This is a simple API
+  description: This is the reference documentation for the configuration file of the Cognite Digital Twin application
   version: 1.0.0
-  title: Simple Inventory API
+  title: Cognite Digital Twin configuration
   contact:
-    email: you@your-company.com
-  license:
-    name: Apache 2.0
-    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+    name: Cognite Support
+    url: https://support.cognite.com
+    email: support@cognite.com
 paths:
-  /inventory:
+  /dummy:
     get:
-      summary: searches inventory
-      operationId: searchInventory
-      description: |
-        By passing in the appropriate options, you can search for
-        available inventory in the system
+      summary: dummy
+      operationId: dummy
+      description: dummy
       responses:
         '200':
-          description: search results matching criteria
+          description: dummy
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/twinConfiguration'
-        '400':
-          description: bad input parameter
-
-
-
-
-
-
-
 
 components:
   schemas:
 
-
      twinConfiguration:
+      description: "Data structure that fully defines a digital twin in the Cognite Digital Twin Application."
       required:
         - header
         - assets
@@ -54,156 +43,165 @@ components:
         assets:
           $ref: '#/components/schemas/assets'
         scenes:
+          description: "Array of 3D scenes in this available in this twin. Only one scene can be active and visible at any moment"
           type: array
           items:
             $ref: '#/components/schemas/scene'
+          minItems: 1
         hierarchy:
           $ref: '#/components/schemas/baseMenuHierarchy'
 
      header:
+      description: "Header containing basic information and metadata about the twin."
       required:
         - name
-        - version
       type: object
       properties:
         name:
+          description: "Name of the twin, as it will be shown in the Digital Twin Application."
           type: string
         thumbnailImageId:
+          description: "File API ID of image that will be used as thumbnail for the twin in the Digital Twin Application."
           type: integer
           format: int64
-        version:
-          type: number
-          format: float
 
      assets:
+      description: "Declaration of the data assets used by this twin. Actors in the twin refer to these assets as data sources."
       type: object
       properties:
         geometries:
+          description: "Map of all geometry data used by this digital twin. Keys in this map represent IDs that can be used as references to the data in twin actors."
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/geometry'
-        images:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/image'
+            $ref: '#/components/schemas/geometryData'
         splines:
+          description: "Map of all spline data used by this digital twin. Keys in this map represent IDs that can be used as references to the data in spline actors."
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/spline'
-        materials:
-          type: array
-          items:
-            $ref: '#/components/schemas/material'
+            $ref: '#/components/schemas/splineData'
 
-     geometry:
+     geometryData:
+      description: "A 3D model asset used by this twin. Contains IDs referencing a 3D model file in the 3D API, and optionally applies a transform to the model. <br>
+colorOverride: color to apply on this 3d model. This color will override any texture information <br>
+photogrammetryLightingOverride: Override for how photogrammetry meshes (if any) in this model are affected by lighting."
       type: object
       required:
         - modelID
         - revisionID
       properties:
         modelID:
+          description: "3D API ID of the model."
           type: integer
           format: int64
         revisionID:
+          description: "3D API ID of the revision of the model."
           type: integer
           format: int64
         transform:
           $ref: '#/components/schemas/relativeTransform'
         colorOverride:
           $ref: '#/components/schemas/color'
-        materialId:
-          type: array
-          items:
-            type: integer
-            format: int32
-        treeIndex:
-          type: array
-          items:
-            type: integer
-            format: int32
+        photogrammetryLightingOverride:
+          $ref: '#/components/schemas/photogrammetryLightingType'
 
-     image:
-      type: object
-      required:
-        - isMipMapped
-        - fileType
-      properties:
-        isMipMapped:
-          type: boolean
-        fileType:
-          type: string
-
-     spline:
+     splineDataFormat:
+       type: string
+       enum:
+         - noTangents
+         - withTangents 
+       description: >
+         Describes the format of spline data:
+           * `noTangents` - Sequence of X, Y, Z coordinates for spline points, in centimeters in the local coordinate system of the spline.
+           * `withTangents ` - Sequence of spline points, where each point in the sequence is represented with 9 floating point numbers; all in the local coordinate system of the spline: <br> - X, Y, Z coordinates of the spline point in centimeters. <br> - X, Y, Z components of incoming tangent vector. <br> - X, Y, Z components of outgoing tangent vector.
+      
+     splineData:
+      description: "Spline data used by this twin."
       type: object
       required:
         - splinePoints
+        - splineDataFormat
       properties:
+        splineDataFormat:
+          $ref: '#/components/schemas/splineDataFormat'
         splinePoints:
+          description: "Array of spline points, with or without tangents."
           type: array
           items:
             type: number
             format: float
-
-     material:
-      type: object
-      properties:
-        emissive:
-          type: integer
-          format: int64
-        diffuse:
-          type: integer
-          format: int64
-        metallic:
-          type: integer
-          format: int64
-        roughness:
-          type: integer
-          format: int64
-        normal:
-          type: integer
-          format: int64
-
           
      menuHierarchyType:
        type: string
        enum:
          - fullAssetHierarchy
          - customHierarchy
+       description: >
+         Source of the hierarchy for the navigation menu:
+           * `fullAssetHierarchy` - "Full asset hierarchy for the current tenant. Should only be used on tenants with very small asset hierarchies."
+           * `customHierarchy` - "Custom made hierarchy, defined in this file."
          
-     location:
+     photogrammetryLightingType:
+       type: string
+       enum:
+         - unlitRendering
+         - litRendering
+       description: >
+         Lighting style for photogrammetry models:
+           * `unlitRendering` - Unlit rendering: The models will not be affected by the lighting in the scene. This is the default setting.
+           * `litRendering` - Lit rendering: The models will be affected by lights and shadows in the scene. This is not recommended, as photogrammetry textures usually have lighting baked into them.
+
+     geographicLocation:
+        description: "Describes a global position using a Coordinate Reference System (CRS) and a set of coordinates."
         type: object
         required:
           - crs
           - coordinates
         properties:
           crs:
+            description: "A Proj.4 formatted string describing a Coordinate Reference System (CRS). Currently, only longlat and utm (for WGS84) are supported."
+            example: "+proj=utm +zone=31 +units=m"
             type: string
           coordinates:
+            description: "An array of three floating-point numbers specifying a coordinate in the given CRS. The third value is always the altitude given in cm."
             type: array
             items:
               type: number
               format: double
+            minItems: 3
+            maxItems: 3
      
-     coordinates:
+     geographicCoordinateMapping:
+       description: >
+         Relates the coordinate system in the application with a geographic coordinate system. Sets up a reference point in geographic coordinates, and the corresponding reference point in the coordinate system of the 3D scene.<br>
+         Additional field usage information:
+           * `referencePointGeographicLocation` - A geographic coordinate to be related with a given position in the coordinate system of the 3D scene.
        type: object
        required:
-         - location
-         - rotationYaw
-         - localOrign
+         - referencePointGeographicLocation
+         - referencePointSceneCoordinate
+         - northAngle
        properties:
-         location:
-           $ref: '#/components/schemas/location'
-         rotationYaw:
-           type: number
-           format: float
-         localOrign:
+         referencePointGeographicLocation:
+           $ref: '#/components/schemas/geographicLocation'
+         referencePointSceneCoordinate:
+           description: "The position in the (Unreal Engine 4) scene coordinate system to be related with the given location in geographic coordinates. Expects an array of three numbers for position (in centimeters) along the XYZ-axes."
            type: array
            items:
              type: number
              format: float
-         
-         
+           minItems: 3
+           maxItems: 3
+         northAngle:
+           description: "The angle (in degrees) from the positive X-direction of the 3D scene that describes geographic north. 0 means the X-axis of the scene is north, 90 means the X-axis is east, etc."
+           type: number
+           format: float
+            
      baseMenuHierarchy:
+      description: > 
+        Defines a navigation menu hierarchy.<br>
+        Variants:
+          * `fullAssetHierarchy` - Defines a navigation menu hierarchy constructed from the full asset hierarchy of the tenant. Warning: Should only be used on tenants with small asset hierarchies, as this will fetch the full asset hierarchy.
+          * `customMenuHierarchy` - Defines a custom navigation menu hierarchy. The children defined here will be considered root nodes, and each root node can have any number of child nodes and subsequent descendant nodes.
       type: object
       discriminator:
         propertyName: type
@@ -217,80 +215,89 @@ components:
           $ref: '#/components/schemas/menuHierarchyType'
 
      fullAssetHierarchy:
+      description: "Defines a navigation menu hierarchy constructed from the full asset hierarchy of the tenant. Warning: Should only be used on tenants with small asset hierarchies, as this will fetch the full asset hierarchy."
       allOf:
         - $ref: '#/components/schemas/baseMenuHierarchy'
         - type: object
           properties:
             rootAssetId:
+              description: "Asset ID of the asset hierarchy node that will be used as root node for the hierarchy."
               type: integer
               format: int64
 
      customMenuHierarchy:
+      description: "Defines a custom navigation menu hierarchy. The children defined here will be considered root nodes, and each root node can have any number of child nodes and subsequent descendant nodes."
       allOf:
         - $ref: '#/components/schemas/baseMenuHierarchy'
         - type: object
           required:
-            - children
+            - rootNodes
           properties:
-            children:
+            rootNodes:
+              description: "Root nodes of the hierarchy."
               type: array
               items:
                 $ref: '#/components/schemas/customMenuHierarchyNode'
 
      customMenuHierarchyNode:
+      description: "A node in a custom menu hierarchy. Can be linked to a CDF asset ID, and can have any number of child nodes."
       type: object
       properties:
         displayName:
+          description: "The name of the node, as it will be displayed in the menu. If both this field and assetInternalId are provided, this field will be displayed instead of the name from the asset associated with the asset ID."
           type: string
         assetInternalId:
+          description: "CDF internal ID of asset associated with this hierarchy node. If displayName is not provided, the name of the asset in CDF will be displayed in the menu."
           type: integer
           format: int64
         children:
+          description: "Child hierarchy nodes."
           type: array
           items:
             $ref: '#/components/schemas/customMenuHierarchyNode'
 
-
-
      scene:
       type: object
-      required:
-        - coordinates
+      description: "Describes a 3D scene and all the objects in it."
       properties:
-        coordinates:
-          $ref: '#/components/schemas/coordinates'
+        geographicCoordinates:
+          $ref: '#/components/schemas/geographicCoordinateMapping'
         cameraCoordinates:
           $ref: '#/components/schemas/absoluteTransform'
         twinActors:
+          description: "List of twin actors: objects that will be placed in the 3D scene, and use 3D models from CDF as their geometry."
           type: array
           items:
             $ref: '#/components/schemas/twinActor'
         terrains:
+          description: "List of objects that describe terrains in the scene."
           type: array
           items:
             $ref: '#/components/schemas/terrain'
         heightRenderer:
           $ref: '#/components/schemas/heightRenderer'
         splineActors:
+          description: "List of objects that describe 3D splines in the scene, e.g. for pipelines."
           type: array
           items:
             $ref: '#/components/schemas/splineActor'
         widgetActors:
+          description: "List of objects that describe 3D widgets positioned in the 3D scene."
           type: array
           items:
             $ref: '#/components/schemas/widgetActor'
-        graphicalLayers:
+        decalActors:
           type: array
           items:
-            $ref: '#/components/schemas/graphicalLayer'
+            $ref: '#/components/schemas/decalActor'
         waterPlane:
           $ref: '#/components/schemas/waterPlane'
         environmentControl:
           $ref: '#/components/schemas/environmentControl'
-        viewModes:
+        visibilityLayers:
           type: array
           items:
-            $ref: '#/components/schemas/viewMode'
+            $ref: '#/components/schemas/visibilityLayers'
 
      terrain:
       type: object
@@ -300,39 +307,53 @@ components:
         transform:
           $ref: '#/components/schemas/absoluteTransform'
         heightMap:
+          description: "A reference to the image to use as the source of heightmap data."
           type: string
         normalMapMap:
+          description: "A reference to the image to use as surface normal information."
           type: string
         baseColor:
+          description: "A reference to the image to use to color the terrain surface."
           type: string
         terrainMinHeight:
+          description: "The height of the lowest point of the terrain."
           type: number
           format: float
         terrainMaxHeight:
+          description: "The height of the highest point of the terrain."
           type: number
           format: float
         heightMapMinValue:
+          description: "The value of the lowest point of the terrain as encoded in the heightmap."
           type: number
           format: float
         heightMapMaxValue:
+          description: "The value of the highest point of the terrain as encoded in the heightmap."
           type: number
           format: float
-        loDScreenSizeFactor:
+        lodScreenSizeFactor:
+          description: "The LOD screen-size factor determines the distance at which refinement of the geometry of the terrain mesh occurs. This impacts the performance and fidelity of the terrain object."
           type: number
           format: float
         tileSizeScale:
+          description: "the tile size scale parameter scales the terrain tiles. It does not affect the scale of the terrain features (see metersPerpixel). This parameter impacts performance, as larger tiles cover more terrain area, so that fewer are needed to cover the same region."
           type: number
           format: float
         metersPerPixel:
+          description: "The meters-per-pixel parameter determines the scale of the terrain data. It specifies how far apart in the scene to space the pixel-centers of the heightmap and the other terrain surface textures. A value of 1 corresponds to 1 meter between each heightmap sample point. The parameter must correspond to the scale and resolution of the provided heightmap."
           type: number
           format: float
         numTilesX:
+          description: "The number of terrain tiles along the first axis."
           type: integer
           format: int32
         numTilesY:
+          description: "The number of terrain tiles along the second axis."
           type: integer
           format: int32
-
+      description : "The terrain object uses heightmap data to produce a 3D terrain in the scene.<br>
+The terrain assumes that the heightmap data is linearly encoded.<br>
+transform: The position of the terrain."
 
      widgetRotationMode:
       type: string
@@ -341,35 +362,47 @@ components:
         - faceCamera
         - faceCamera_ZOnly
         - faceCamera_HorizontalAlignment
+      description: >
+         Rotation type for widgets in the scene (relative to camera):
+           * `noRotation` - The rotation will be fixed to the direction given by the transform.
+           * `faceCamera` - The widget will rotate to always face towards the camera.
+           * `faceCamera_ZOnly` - The widget will rotate around its vertical axis to face towards the camera. (Typical use-case: rotated towards camera while staying perpendicular to the ground).
+           * `faceCamera_HorizontalAlignment` - The widget will always face towards the camera and be aligned to the screen. Equivalent to a 2D widget, but placed in 3D space.
         
      widgetType:
        type: string
        enum:
          - text
+       description: >
+          Describes a type of a widget
+            * `text` - A widget displaying a single string of text.
+
 
      widgetBase:
+      description: Base class for widgets (texts, images, etc) that appear in a scene.
       discriminator:
         propertyName: type
         mapping:
           text: '#/components/schemas/widgetText'
       required:
         - type
-        - content
       properties:
         type:
           $ref: '#/components/schemas/widgetType'
-        content:
-          type: string
         assetId:
+          description: Asset ID in CDF to which widget should be connected (useful for connecting widget to specific building on scene without explicitly specifying widget's location)
           type: integer
           format: int64
         minScreenSize:
+          description: Minimal percentage of screen size along vertical axis for widget to occupy.
           type: number
           format: float
         cutOffDistance:
+          description: Distance from camera above which the widget becomes invisible (If not specified, the widget will be visible from any distance).
           type: number
           format: float
         fadeDistance:
+          description: Defines the size of the region where the visibility of the widget fades out. The widget will start fading out at a distance cutOffDistance - fadeDistance from the camera, and be completely invisible at a camera distance equal to cutOffDistance.
           type: number
           format: float
         transform:
@@ -377,51 +410,90 @@ components:
         rotationMode:
           $ref: '#/components/schemas/widgetRotationMode'
 
+     fontTypeface:
+       description: "Font family"
+       type: string
+       enum:
+         - black
+         - blackItalic
+         - bold
+         - boldItalic
+         - extraBoldItalic
+         - extraLight
+         - extraLightItalic
+         - italic
+         - light
+         - lightItalic
+         - medium
+         - mediumItalic
+         - regular
+         - semiBold
+         - semiBoldItalic
+         - thin
+         - thinItalic
+
      widgetText:
       allOf:
         - $ref: '#/components/schemas/widgetBase'
         - type: object
+          description: Widget for creating text labels in the 3D scene.
+          required:
+            - content
           properties:
+            content:
+              description: "String content of the text widget. Supports inline time series, see example for syntax."
+              example: "Temperature is {timeseriesID:012345} degrees."
+              type: string
             color:
               $ref: '#/components/schemas/color'
             size:
+              description: Font size for text
               type: number
               format: float
             outlineSize:
+              description: Outline size for text
               type: number
               format: float
             outlineColor:
               $ref: '#/components/schemas/color'
             typeface:
-              type: string
+              $ref: '#/components/schemas/fontTypeface'
             shadowColor:
               $ref: '#/components/schemas/color'
             shadowOffsetX:
+              description: Offset of a shadow along horizontal axis
               type: number
               format: float
             shadowOffsetY:
+              description: Offset of a shadow along vertical axis
               type: number
               format: float
             backgroundColor:
               $ref: '#/components/schemas/color'
 
-
-     transformSensorType:
+     transformControllerType:
        type: string
        enum:
-         - latLongSeparate
+         - latLongSeparateTimeSeries
+       description: >
+          Specifies the type of a transform controller
+            * `latLongSeparateTimeSeries` - Controls the position and rotation of an actor based on time series containing latitude and longitude information.
            
-     transfromSensorBase:
+     transformControllerBase:
+      description: > 
+        Controls the transform (position, rotation, scale) of the actor it is attached to.<br> 
+        Variants:
+          * `latLongSeparateController` - Controls the position and rotation of an actor based on time series containing latitude and longitude information.
       discriminator:
         propertyName: type
         mapping:
-          latLongSeparate: '#/components/schemas/latLongSeparateSensor'
+          latLongSeparateTimeSeries: '#/components/schemas/latLongSeparateController'
       type: object
       required:
         - type
       properties:
         type:
-          $ref: '#/components/schemas/transformSensorType'
+          $ref: '#/components/schemas/transformControllerType'
 
      heightTrackingMode:
       type: string
@@ -429,10 +501,16 @@ components:
         - none
         - constantValue
         - heightmapData
+      description: >
+         Determines how the vertical position of an actor will be adjusted by a transform controller:
+           * `none` - The vertical position of the actor will not be affected by the controller.
+           * `constantValue` - The actor will be placed at a fixed height.
+           * `heightmapData` - The vertical position of the actor is determined by a height map.
 
-     latLongSeparateSensor:
+     latLongSeparateController:
+      description: "Controls the position and rotation of an actor based on time series containing latitude and longitude information."
       allOf:
-        - $ref: '#/components/schemas/transfromSensorBase'
+        - $ref: '#/components/schemas/transformControllerBase'
         - type: object
           required:
             - latitudeTimeSeriesName
@@ -440,21 +518,23 @@ components:
             - heightTrackingMode
           properties:
             latitudeTimeSeriesName:
+              description: "The name of the time series from which to read geographic latitude coordinate data."
               type: string
             longitudeTimeSeriesName:
+              description: "The name of the time series from which to read geographic longitude coordinate data."
               type: string
             heightTrackingMode:
               $ref: '#/components/schemas/heightTrackingMode'
             defaultHeightPosition:
+              description: "If heightTrackingMode is set to constantValue, then defaultHeightPosition is used to specify the constant height value to use."
               type: number
               format: float
             simulateRotationFromPosition:
+              description: "Uses consecutive positions to infer rotation. Assumes that the first axis (the X-axis in local object space) should be aligned with the tangent vector of the position."
               type: boolean
 
-     
-   
-
      actorBase:
+      description: Abstract base class for objects (actors) that can appear in scene.
       discriminator:
         propertyName: actorType
       type: object
@@ -465,52 +545,50 @@ components:
         actorType:
           type: string
         name:
+          description: Unique name of the actor in scene.
           type: string
         transform:
           $ref: '#/components/schemas/absoluteTransform'
         widgets:
+          description: Widgets that should be attached to this actor. (if actor will move, widgets will move along with it)
           type: array
           items:
             $ref: '#/components/schemas/widgetBase'
-        positionSensors:
-          type: array
-          items:
-            $ref: '#/components/schemas/transfromSensorBase'
+        transformController:
+          $ref: '#/components/schemas/transformControllerBase'
         hiddenByDefault:
+          description: if true, actor will be invisible when entering a scene
           type: boolean
 
      twinActor:
+      description: "An object that will be placed in the 3D scene, and uses a 3D model from CDF as its geometry."
       allOf:
         - $ref: '#/components/schemas/actorBase'
         - type: object
+          description: Class for describing twin actors (objects that represent instance of geometry)
           required:
-            - geometry
+            - geometryDataID
           properties:
-            geometry:
+            geometryDataID:
+              description: Name of geometry listed in 'assets' section that this actor should use
               type: string
 
-
-     splineType:
-      type: string
-      enum:
-        - noTangents
-        - withTangents
-
+     
      splineActor:
       allOf:
         - $ref: '#/components/schemas/actorBase'
         - type: object
+          description: Class for describing pipelines in scene
           required:
-            - splineAssetID
-            - splineType
+            - splineDataID
             - radius
             - color
           properties:
-            splineAssetID:
+            splineDataID:
+              description: Name of spline asset listed in 'assets' section that this actor should use
               type: string
-            splineType:
-              $ref: '#/components/schemas/splineType'
             radius:
+              description: Radius of the pipeline
               type: number
               format: float
             color:
@@ -520,6 +598,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/actorBase'
         - type: object
+          description: Class for describing pure widget objects in a scene
 
      heightRenderer:
       type: object
@@ -529,71 +608,90 @@ components:
         - textureSize
       properties:
         location:
+          description: "Determines where in the scene the heightmap is captured from."
           type: array
+          minItems: 3
+          maxItems: 3
           items:
             type: number
             format: float
         orthoWidth:
+          description: "Determines the extent of the scene area captured by the height-renderer."
           type: number
           format: float
         textureSize:
+          description: "Determines the resolution of the height data."
           type: integer
           format: int32
+      description: "An object in the scene responsible for capturing a heightmap. <br>
+The heightmap is used to determine the height-position of objects in the scene which do not have any other way of determining height position."
 
-     graphicalLayer:
+
+     decalActor:
       allOf:
         - $ref: '#/components/schemas/actorBase'
         - type: object
           required:
-            - size
-            - textureSize
+            - decalHeight
             - imageId
           properties:
-            size:
+            decalHeight:
+              description: "The height of the box volume which contains and restricts the projected texture. <br> It determines the height range across which the projected image is applied."
               type: number
               format: float
-            textureSize:
-              type: integer
-              format: int32
             imageId:
+              description: "The file ID of the image in the file API."
               type: integer
               format: int64
-            resourcePath:
-              type: string
 
      waterPlane:
       type: object
       properties:
         followCamera:
+          description: "Determines whether the water plane object moves with the player, creating an illusion of an endless expanse of water."
           type: boolean
         heightZoomFactor:
+          description: "Adjusts the scale of the water surface as a function of camera height. This essentially moves the horizon of the water further away by scaling the water by the given factor, which helps maintain the same level of detail at all scales. The parameters should be left to a default of 1.0 in most cases."
           type: number
           format: float
         minimumHeight:
+          description: "The lowest height at which to scale the water surface. This is to prevent the water from disappearing when near zero height. Should be left at default, or a number slightly larger than zero."
           type: number
           format: float
         transform:
           $ref: '#/components/schemas/absoluteTransform'
+      description:
+       "An object in the scene responsible for rendering a water surface. Typically used for oceans."
 
      environmentControl:
+      description: >
+         The environment controller is responsible for controlling environmental effects such as weather, underwater effects, and so on.<br>
+         Additional field usage information:
+           * `fogInscatteringColor` - A property of the Unreal engine post-process volume, which is used here for the underwater fogginess effect.
       type: object
       properties:
-        fogInscatteringColor:
+        underwaterColor:
           $ref: '#/components/schemas/color'
         useDynamicLighting:
+          description: "Whether or not to use dynamic lighting in the scene. Currently only affects the sunlight."
           type: boolean
         renderSkySphere:
+          description: "Whether or not to render the sky. Can be used to turn off sky rendering for indoor scenes."
           type: boolean
 
-     viewMode:
+     visibilityLayers:
+      description: "A view mode determines the visibility of a set of objects in the scene.<br>
+If a view mode is toggled, then it toggles the visibility of all its referenced objects."
       type: object
       required:
         - name
         - actorNames
       properties:
         name:
+          description: "The name of the view mode as it appears in the user interface"
           type: string
         actorNames:
+          description: "A set of objects which is referenced by this view mode for visibility filtering."
           type: array
           items:
             type: string
@@ -604,8 +702,17 @@ components:
        enum:
          - unrealTransform
          - universalTransform
+       description: >
+          Specification of the format or coordinate system of a (world space) transform:
+             * `unrealTransform` - Coordinates are given in the Unreal Engine 4 coordinate system.
+             * `universalTransform` - Coordinates are given in a geographic coordinate system described by a CRS.
 
      absoluteTransform:
+      description: >
+        A world space transform - a transformation of position, rotation and scale in the coordinate system of the 3D scene.<br>
+        Variants:
+          * `unrealTransform` - A world space transform represented in the Unreal Engine 4 coordinate system.
+          * `universalTransform` - A world space transform represented geographic coordinate system described by a CRS. For this to work correctly, the scene must be set up with proper geographic coordinates.
       type: object
       required:
         - type
@@ -617,9 +724,9 @@ components:
       properties:
         type:
           $ref: '#/components/schemas/absoluteTransformType'
-        
 
      unrealTransform:
+      description: "A world space transform represented in the Unreal Engine 4 coordinate system."
       allOf:
         - $ref: '#/components/schemas/absoluteTransform'
         - type: object
@@ -629,22 +736,32 @@ components:
             - scale
           properties:
             position:
+              description: "The position of the target object in the scene coordinate system. Expects an array of three numbers for position (in centimeters) along the XYZ-axes."
               type: array
+              minItems: 3
+              maxItems: 3
               items:
                 type: number
                 format: float
             rotation:
+              description: "The orientation of the target object in the space of the 3D scene. Expects an array of three numbers describing the Pitch, Yaw and Roll angles in degrees. This corresponds to rotation around the Y, X and Z axes of the scene respectively."
               type: array
+              minItems: 3
+              maxItems: 3
               items:
                 type: number
                 format: float
             scale:
+              description: "Scales the target object along each axis in its local coordinate system. Expects an array of three numbers describing scale multipliers along the XYZ-axes. A value of [1.0, 1.0, 1.0] corresponds to the original scale. Note that not all objects support non-uniform scaling (different scale values along each axis)."
               type: array
+              minItems: 3
+              maxItems: 3
               items:
                 type: number
                 format: float
 
      universalTransform:
+      description: "A world space transform represented geographic coordinate system described by a CRS. For this to work correctly, the scene must be set up with proper geographic coordinates."
       allOf:
         - $ref: '#/components/schemas/absoluteTransform'
         - type: object
@@ -654,20 +771,26 @@ components:
             - scale
           properties:
             location:
-              $ref: '#/components/schemas/location'
+              $ref: '#/components/schemas/geographicLocation'
             rotation:
+              description: "The orientation of the target object in the space of the 3D scene. Expects an array of three numbers describing the Pitch, Yaw and Roll angles in degrees. This corresponds to rotation around the Y, X and Z axes of the scene respectively."
               type: array
+              minItems: 3
+              maxItems: 3
               items:
                 type: number
                 format: float
             scale:
+              description: "Scales the target object along each axis in its local coordinate system. Expects an array of three numbers describing scale multipliers along the XYZ-axes. A value of [1.0, 1.0, 1.0] corresponds to the original scale. Note that not all objects support non-uniform scaling (different scale values along each axis)."
               type: array
+              minItems: 3
+              maxItems: 3
               items:
                 type: number
                 format: float
-     
 
      relativeTransform:
+      description: "A transformation in an object's local coordinate system. This is primarily used for changing the origin, scale or default orientation of a 3D model."
       type: object
       required:
         - position
@@ -675,25 +798,37 @@ components:
         - scale
       properties:
         position:
+          description: "Offsets the position of the target object in its local coordinate system. This is equivalent to changing the origin of the object. Expects an array of three numbers, corresponding to offsets along the XYZ-axes. A value of [0.0, 0.0, 0.0] corresponds to no change."
           type: array
+          example: [100.0, 0.0, -50.0]
+          minItems: 3
+          maxItems: 3
           items:
             type: number
             format: float
         rotation:
+          description: "Rotates the target object in its local coordinate system. Expects an array of three numbers describing the Pitch, Yaw and Roll angles in degrees. This corresponds to rotation around its local Y, X and Z axes respectively. A value of [0.0, 0.0, 0.0] corresponds to no change."
           type: array
+          example: [-90.0, 0.0, 180.0]
+          minItems: 3
+          maxItems: 3
           items:
             type: number
             format: float
         scale:
+          description: "Scales the target object along each axis in its local coordinate system. Expects an array of three numbers describing scale multipliers along the XYZ-axes. A value of [1.0, 1.0, 1.0] corresponds to the original scale. Note that not all objects support non-uniform scaling (different scale values along each axis)."
           type: array
+          example: [0.5, 0.5, 0.5]
+          minItems: 3
+          maxItems: 3
           items:
             type: number
             format: float
 
-
      color:
       type: string
-      description: "hex color"
+      description: "Color in hexadecimal format (HTML standard)"
+      example: "#05ff54"
 
 
 

@@ -1,5 +1,6 @@
-{{#models}}{{#model}}
-{{^isEnum}}
+{{#models}}{{#model}}{{^isEnum}}// This is auto-generated code based on Twin configuration OpenAPI!
+// DO NOT MODIFY THIS FILE DIRECTLY!
+
 #include "{{classFilename}}.h"
 
 #include "Json.h"
@@ -66,10 +67,4 @@ TSharedRef<FJsonValue> {{classname}}::SerializeToJson() const
 	
 	return ToValueObject(JsonObject);
 }
-
-
-
-{{/isEnum}}
-{{/model}}
-{{/models}}
-
+{{/isEnum}}{{/model}}{{/models}}

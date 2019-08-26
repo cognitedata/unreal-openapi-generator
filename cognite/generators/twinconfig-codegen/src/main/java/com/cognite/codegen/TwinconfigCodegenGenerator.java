@@ -25,16 +25,21 @@ import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.parser.util.SchemaTypeUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.openapitools.codegen.CodegenConfig;
 import org.openapitools.codegen.CodegenType;
 import org.openapitools.codegen.SupportingFile;
 import org.openapitools.codegen.utils.ModelUtils;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.FileWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-
 
 import static org.openapitools.codegen.utils.StringUtils.camelize;
 
@@ -333,7 +338,57 @@ public class TwinconfigCodegenGenerator extends AbstractCppCodegen implements Co
              file.getName().endsWith("OneOf.cpp") ) {
             
                 file.delete();
+                return;
         }
+
+        StringBuilder builder = new StringBuilder();
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            String currentLine = reader.readLine();
+            while (currentLine != null) {
+                builder.append(currentLine);
+                builder.append("\n");
+                currentLine = reader.readLine();
+            }
+            reader.close();
+        }
+        catch (IOException e) { 
+            // do something 
+            e.printStackTrace(); 
+        }
+
+
+        
+        String fileContent = builder.toString();
+        
+        // if file is empty - delete it!
+        if ( fileContent.replaceAll("\n", "").isEmpty() )
+        {
+            file.delete();
+            return;
+        }
+
+        fileContent = StringEscapeUtils.unescapeHtml4(fileContent);
+        // remove all double new lines
+        fileContent = fileContent.replaceAll(". <br>", ".\n\t");
+        // replace html new lines to actual new lines
+        fileContent = fileContent.replaceAll("<br>", "\n");
+        // split long lines based on sentences
+        fileContent = fileContent.replaceAll("\\. ", ".\n\t");
+        // remove empty comment sections
+        fileContent = fileContent.replaceAll("\n\t/\\*\\*\n\t\n\t\\*/", "");
+                                          
+        try {
+            FileWriter writer = new FileWriter(file, false);
+            writer.write(fileContent);
+            writer.close();
+        }
+        catch (IOException e) { 
+            // do something 
+            e.printStackTrace(); 
+        } 
+
+
     }
     @Override	
     public boolean isEnablePostProcessFile() {

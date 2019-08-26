@@ -1,3 +1,6 @@
+// This is auto-generated code based on Twin configuration OpenAPI!
+// DO NOT MODIFY THIS FILE DIRECTLY!
+
 #pragma once
 
 #include "CDP_API_HelperTypes.h"
@@ -11,39 +14,57 @@
 {{^isEnum}}
 #include "{{classFilename}}.generated.h"
 
+/*
+	{{unescapedDescription}}
+*/
 USTRUCT()
 struct COGNITETWINCONFIG_API {{classname}} : public {{#parent}}{{parent}}{{/parent}}{{^parent}}FCDP_JsonSerializable{{/parent}}
 {
 	GENERATED_BODY()
 
-	static TSharedPtr<{{classname}}> ConstructFromJson(const TSharedPtr<FJsonObject>& JsonObject);
+	//************************************************************//
+	//                   Required parameters                      //
+	//************************************************************//
 
-	//
-	// Required parameters
-	//
 	{{#vars}}
 	{{#required}}
+	/**
+	{{unescapedDescription}}
+	*/
 	{{#isContainer}}{{dataType}}{{#isMapContainer}}< FString, {{#items}}{{#isModel}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}{{^isEnum}}>{{/isEnum}}{{/isModel}}{{/items}}>{{/isMapContainer}}{{^isMapContainer}}<{{#items}}{{#isModel}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}{{^isEnum}}>{{/isEnum}}{{/isModel}}{{/items}}>{{/isMapContainer}}{{/isContainer}}{{^isContainer}}{{#isModel}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}{{^isEnum}}>{{/isEnum}}{{/isModel}}{{/isContainer}} {{name}};
+	
 	{{/required}}
 	{{/vars}}
 	
-	//
-	// Optional parameters
-	//
+
+	//************************************************************//
+	//                   Optional parameters                      //
+	//************************************************************//
+
 	{{#vars}}
 	{{^required}}
+	/**
+	{{unescapedDescription}}
+	*/
 	TOptional<{{#isContainer}}{{dataType}}{{#isMapContainer}}< FString, {{#items}}{{#isModel}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}{{^isEnum}}>{{/isEnum}}{{/isModel}}{{/items}}>{{/isMapContainer}}{{^isMapContainer}}<{{#items}}{{#isModel}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}{{^isEnum}}>{{/isEnum}}{{/isModel}}{{/items}}>{{/isMapContainer}}{{/isContainer}}{{^isContainer}}{{#isModel}}{{^isEnum}}TSharedPtr<{{/isEnum}}{{/isModel}}{{dataType}}{{#isModel}}{{^isEnum}}>{{/isEnum}}{{/isModel}}{{/isContainer}}> {{name}};
+	
 	{{/required}}
 	{{/vars}}
+	
 
-	//
-	// Serialization functions
-	//
+	//************************************************************//
+	//                Serialization functions                     //
+	//************************************************************//
+
+	static TSharedPtr<{{classname}}> ConstructFromJson(const TSharedPtr<FJsonObject>& JsonObject);
 	bool InitFromJson(const TSharedPtr<class FJsonObject>& JsonObject);
 	TSharedRef<FJsonValue> SerializeToJson() const;
 };
 {{/isEnum}}
 {{#isEnum}}
+/*
+{{unescapedDescription}}
+*/
 UENUM(BlueprintType)
 enum class {{classname}} : uint8
 {
@@ -53,7 +74,4 @@ enum class {{classname}} : uint8
 	{{/enumVars}}
 	{{/allowableValues}}
 };
-{{/isEnum}}
-{{/model}}
-{{/models}}
-
+{{/isEnum}}{{/model}}{{/models}}
