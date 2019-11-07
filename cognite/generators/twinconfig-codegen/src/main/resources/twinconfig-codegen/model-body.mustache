@@ -1,5 +1,5 @@
 {{#models}}{{#model}}{{^isEnum}}// This is auto-generated code based on Twin configuration OpenAPI!
-// DO NOT MODIFY THIS FILE DIRECTLY!
+// DO NOT MODIFY THIS C++ FILE DIRECTLY!
 
 #include "{{classFilename}}.h"
 
@@ -27,7 +27,15 @@ TSharedPtr<{{classname}}> {{classname}}::ConstructFromJson(const TSharedPtr<FJso
 				return RetVal;
 			}
 		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("{{classname}}::ConstructFromJson {{propertyName}} != {{mappingName}}"));
+		}
 		{{/mappedModels}}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("{{classname}}::ConstructFromJson TryGetField {{propertyName}} failed"));
 	}
 {{/discriminator}}
 {{^discriminator}}
