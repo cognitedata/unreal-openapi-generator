@@ -58,8 +58,7 @@ struct COGNITETWINCONFIG_API {{classname}} : public {{#parent}}{{parent}}{{/pare
 
 	static TSharedPtr<{{classname}}> ConstructFromJson(const TSharedPtr<FJsonObject>& JsonObject);
 	bool InitFromJson(const TSharedPtr<class FJsonObject>& JsonObject);
-
-	TSharedRef<FJsonValue> ConstructToJson() const;
+	
 	TSharedRef<FJsonValue> SerializeToJson() const;
 };
 {{/isEnum}}

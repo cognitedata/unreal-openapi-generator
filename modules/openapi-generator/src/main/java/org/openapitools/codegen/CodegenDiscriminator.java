@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class CodegenDiscriminator {
+    private String propertyClass;
     private String propertyName;
     private Map<String, String> mapping;
     private Set<MappedModel> mappedModels = new LinkedHashSet<>();
@@ -30,6 +31,14 @@ public class CodegenDiscriminator {
 
     public void setPropertyName(String propertyName) {
         this.propertyName = propertyName;
+    }
+
+    public String getPropertyClass() {
+        return propertyClass;
+    }
+
+    public void setPropertyClass(String propertyClass) {
+        this.propertyClass = propertyClass;
     }
 
     public Map<String, String> getMapping() {
@@ -100,13 +109,14 @@ public class CodegenDiscriminator {
 
     @Override
     public int hashCode() {
-        return Objects.hash(propertyName, mapping, mappedModels, imports);
+        return Objects.hash(propertyName, propertyClass, mapping, mappedModels, imports);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .append("propertyName", propertyName)
+                .append("propertyClass", propertyClass)
                 .append("mapping", mapping)
                 .append("mappedModels", mappedModels)
                 .append("imports", imports)
