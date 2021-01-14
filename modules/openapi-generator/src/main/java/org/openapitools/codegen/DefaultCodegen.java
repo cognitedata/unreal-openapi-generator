@@ -1864,6 +1864,17 @@ public class DefaultCodegen implements CodegenConfig {
         }
         CodegenDiscriminator discriminator = new CodegenDiscriminator();
         discriminator.setPropertyName(toVarName(schema.getDiscriminator().getPropertyName()));
+        if (schema.getProperties() != null && !schema.getProperties().isEmpty()) {
+            Map<String, Schema> properties = schema.getProperties();
+
+            for (Map.Entry<String, Schema> entry : properties.entrySet()) {
+                
+                if ( entry.getKey().equals(schema.getDiscriminator().getPropertyName()) ) {
+                    discriminator.setPropertyClass( getTypeDeclaration(entry.getValue()) );
+                }
+            }
+        }
+
         discriminator.setMapping(schema.getDiscriminator().getMapping());
         if (schema.getDiscriminator().getMapping() != null && !schema.getDiscriminator().getMapping().isEmpty()) {
             for (Entry<String, String> e : schema.getDiscriminator().getMapping().entrySet()) {
