@@ -27,11 +27,8 @@ TSharedPtr<{{classname}}> {{classname}}::ConstructFromJson(const TSharedPtr<FJso
 				return RetVal;
 			}
 		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("{{classname}}::ConstructFromJson {{propertyName}} != {{mappingName}}"));
-		}
 		{{/mappedModels}}
+		UE_LOG(LogTemp, Warning, TEXT("{{classname}}::ConstructFromJson no matching property: %s"), *{{propertyName}});
 	}
 	else
 	{
